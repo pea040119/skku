@@ -6,15 +6,14 @@ CREATE TABLE Users {
 
 
 CREATE TABLE Items {
-    item_id VARCHAR(50) PRIMARY KEY,
+    item_id SERIAL PRIMARY KEY,
     category INT NOT NULL,
-    description TEXT,
+    description VARCHAR(50),
     condition INT NOT NULL,
     seller_id VARCHAR(20) NOT NULL,
     buy_it_now_price NUMERIC(10, 2) NOT NULL,
     date_posted TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     bid_closing_date TIMESTAMPTZ NOT NULL,
-    status VARCHAR(50),
     FOREIGN KEY (seller_id) REFERENCES Users(user_id),
     CONSTRAINT category_check CHECK (category BETWEEN 1 AND 7),
     CONSTRAINT condition_check CHECK (condition BETWEEN 1 AND 4)
@@ -23,7 +22,7 @@ CREATE TABLE Items {
 
 CREATE TABLE Bids {
     bid_id SERIAL PRIMARY KEY,
-    item_id VARCHAR(50) NOT NULL,
+    item_id INT NOT NULL,
     bid_price NUMERIC(10, 2) NOT NULL,
     bidder_id VARCHAR(20) NOT NULL,
     date_posted TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -35,7 +34,7 @@ CREATE TABLE Bids {
 
 CREATE TABLE OldBids {
     bid_id SERIAL PRIMARY KEY,
-    item_id VARCHAR(50) NOT NULL,
+    item_id VINT NOT NULL,
     bid_price NUMERIC(10, 2) NOT NULL,
     bidder_id VARCHAR(20) NOT NULL,
     date_posted TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -47,7 +46,7 @@ CREATE TABLE OldBids {
 
 CREATE TABLE Billing {
     transaction_id SERIAL PRIMARY KEY,
-    item_id VARCHAR(50) NOT NULL,
+    item_id INT NOT NULL,
     sold_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     seller_id VARCHAR(20) NOT NULL,
     buyer_id VARCHAR(20) NOT NULL,

@@ -13,8 +13,8 @@ import java.math. *;
 public class Auction {
 	private static Scanner scanner = new Scanner(System.in);
 	private static String username;
-	private static Connection conn;
-	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private static Connection connection;
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 	public enum Category {
 		ELECTRONICS(1),
@@ -44,10 +44,20 @@ public class Auction {
 		}
 	}
 	enum Condition {
-		NEW,
-		LIKE_NEW,
-		GOOD,
-		ACCEPTABLE
+		NEW(1),
+		LIKE_NEW(2),
+		GOOD(3),
+		ACCEPTABLE(4);
+		
+		private final int value;
+		
+		private Condition(int value) {
+			this.value = value;
+		}
+		
+		public int getValue() {
+			return value;
+		}
 	}
 
 	private static boolean LoginMenu() {
@@ -212,21 +222,41 @@ public class Auction {
 
 			price = scanner.nextInt();
 			scanner.nextLine();
+			BigDecimal set_price = new BigDecimal(price);
 
 			System.out.print("---- Bid closing date and time (YYYY-MM-DD HH:MM): ");
 			// you may assume users always enter valid date/time
 			String date = scanner.nextLine();  /* "2023-03-04 11:30"; */
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 			LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
 		}catch (Exception e) {
 			System.out.println("Error: Invalid input is entered. Going back to the previous menu.");
 			return false;
 		}
 
-		/* TODO: Your code should come here to store the user inputs in your database */
+		boolean is_success = false;
+		String query = "INSERT INTO Items (category, description, condition, seller_id, buy_it_now_price, bid_closing_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+		try {
+			PreparedStatement pstmt = connection.prepareStatement(query);
+			
+			pstmt.setInt(1, category.getValue());
+			pstmt.setString(2, description);
+			pstmt.setInt(3, condition.getValue());
+			pstmt.setString(4, username);
+			pstmt.setBigDecimal(5, set_price);
+			pstmt.setTimestamp(6, dateTime);
 
-		System.out.println("Your item has been successfully listed.\n");
-		return true;
+			int rowsAffected = pstmt.executeUpdate();
+			if (rowsAffected != 0) {
+				System.out.println("Your item has been successfully listed.\n");
+				is_success = true;
+			} else {
+				System.out.println("Your item has not been successfully listed.\n");
+			}
+			
+			pstmt.close();
+		}
+
+		return is_success;
 	}
 
 	private static boolean SignupMenu() {
@@ -375,20 +405,21 @@ public class Auction {
 				try {
 					PreparedStatement pstmt = connection.prepareStatement(query);
 					pstmt.setString(1, keyword);
-					String item_id, seller_id, buyer_id;
+					String seller_id, buyer_id;
 					BigDecimal price, commissions;
 					Timestamp sold_date;
+					int item_id;
 					 
 					try {
 						ResultSet rs = pstmt.executeQuery()
 						while(rs.next()) {
-							item_id = rs.getString("item_id");
+							item_id = rs.getInt("item_id");
 							seller_id = rs.getString("seller_id");
 							buyer_id = rs.getString("buyer_id");
 							price = rs.getBigDecimal("price");
 							commissions = price.divede(new BigDecimal("10"));
 							sold_date = rs.getTimestamp("sold_date");
-							System.out.println(item_id+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+seller_id+"\t"+buyer_id+"\t"+price.toString()+"\t"+commissions.toString());
+							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+seller_id+"\t"+buyer_id+"\t"+price.toString()+"\t"+commissions.toString());
 						}
 						rs.close();
 					}
@@ -408,19 +439,20 @@ public class Auction {
 				try {
 					PreparedStatement pstmt = connection.prepareStatement(query);
 					pstmt.setString(1, seller);
-					String item_id, buyer_id;
+					String buyer_id;
 					BigDecimal price, commissions;
 					Timestamp sold_date;
+					int item_id;
 					 
 					try {
 						ResultSet rs = pstmt.executeQuery()
 						while(rs.next()) {
-							item_id = rs.getString("item_id");
+							item_id = rs.getInt("item_id");
 							buyer_id = rs.getString("buyer_id");
 							price = rs.getBigDecimal("price");
 							commissions = price.divede(new BigDecimal("10"));
 							sold_date = rs.getTimestamp("sold_date");
-							System.out.println(item_id+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+buyer_id+"\t"+price.toString()+"\t"+commissions.toString());
+							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+buyer_id+"\t"+price.toString()+"\t"+commissions.toString());
 						}
 						rs.close();
 					}
@@ -445,6 +477,7 @@ public class Auction {
 						while(rs.next()) {
 							seller_id = rs.getString("seller_id");
 							total_price = rs.getBigDecimal("total_price");
+							total_price = total_price.multiply(BigDecimal.valueOf(0.9));
 							num_item = rs.getInt("num_item");
 							System.out.println(seller_id+"\t"+num_item.toString()+"\t"+total_price.toString());
 						}
@@ -497,18 +530,19 @@ public class Auction {
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String item_id, bidder_id;
+			String bidder_id;
 			Timestamp bid_date;
 			BigDecimal bid_price;
+			int item_id;
 				
 			try {
 				ResultSet rs = pstmt.executeQuery()
 				while(rs.next()) {
-					item_id = rs.getString("item_id");
+					item_id = rs.getInt("item_id");
 					bidder_id = rs.getString("bidder_id");
 					bid_price = rs.getBigDecimal("bid_price");
 					bid_date = rs.getTimestamp("bid_date");
-					System.out.println(item_id+"\t"+bidder_id+"\t"+bid_price.toString()+"\t"+bid_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+bidder_id+"\t"+bid_price.toString()+"\t"+bid_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			}
@@ -640,19 +674,10 @@ public class Auction {
 			return false;
 		}
 
-		/* TODO: Query condition: item category */
-		/* TODO: Query condition: item condition */
-		/* TODO: Query condition: items whose description match the keyword (use LIKE operator) */
-		/* TODO: Query condition: items from a particular seller */
-		/* TODO: Query condition: posted date of item */
-
-		/* TODO: List all items that match the query condition */
 		System.out.println("Item ID | Item description | Condition | Seller | Buy-It-Now | Current Bid | highest bidder | Time left | bid close");
 		System.out.println("-------------------------------------------------------------------------------------------------------");
-		/* 
-		   while(rset.next()){ 
-		   }
-		 */
+		
+		
 
 		System.out.println("---- Select Item ID to buy or bid: ");
 
@@ -688,40 +713,69 @@ public class Auction {
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String item_id, description;
+			String description;
 			Timestamp bid_closing_date;
 			BigDecimal bid_price;
+			int item_id;
 				
 			try {
 				ResultSet rs = pstmt.executeQuery()
 				while(rs.next()) {
-					item_id = rs.getString("item_id");
+					item_id = rs.getInt("item_id");
 					description = rs.getString("description");
 					bid_price = rs.getBigDecimal("bid_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id+"\t"+description+"\t"+username+"\t"+bid_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+description+"\t"+username+"\t"+bid_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			}
 			pstmt.close();
 		}
 
-		String query = "SELECT b.item_id, i.decription, b.bid_price b.bid_closing_date FROM OldBids as b JOIN Items as i ON b.item_id = i.item_id WHERE b.bidder_id=?";
+		String query = "SELECT o.item_id as item_id,  i.description as dscription, b.bidder_id as highest_bidder, b.bid_price as highest_price, o.bid_price as bid_price b.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Bids as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String item_id, description;
+			String description, highest_bidder;
 			Timestamp bid_closing_date;
-			BigDecimal bid_price;
+			BigDecimal bid_price, highest_price;
+			int item_id;
 				
 			try {
 				ResultSet rs = pstmt.executeQuery()
 				while(rs.next()) {
-					item_id = rs.getString("item_id");
+					item_id = rs.getInt("item_id");
 					description = rs.getString("description");
+					highest_bidder = rs.getString("highest_bidder")
 					bid_price = rs.getBigDecimal("bid_price");
+					highest_price = rs.getBigDecimal("highest_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id+"\t"+description+"\t"+username+"\t"+bid_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+highest_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+				}
+				rs.close();
+			}
+			pstmt.close();
+		}
+
+		String query = "SELECT o.item_id as item_id,  i.description as dscription, b.buyer_id as highest_bidder, b.price as highest_price, o.bid_price as bid_price b.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Billing as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
+		try {
+			PreparedStatement pstmt = connection.prepareStatement(query);
+			pstmt.setString(1, username);
+			String description, highest_bidder;
+			Timestamp bid_closing_date;
+			BigDecimal bid_price, highest_price;
+			int item_id;
+				
+			try {
+				ResultSet rs = pstmt.executeQuery()
+				while(rs.next()) {
+					item_id = rs.getInt("item_id");
+					description = rs.getString("description");
+					highest_bidder = rs.getString("highest_bidder")
+					bid_price = rs.getBigDecimal("bid_price");
+					highest_price = rs.getBigDecimal("highest_price");
+					bid_closing_date = rs.getTimestamp("bid_closing_date");
+					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+highest_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			}
@@ -739,19 +793,22 @@ public class Auction {
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String item_id, buyer_id;
+			String buyer_id;
 			Category category;
 			Timestamp sold_date;
-			BigDecimal price;
+			BigDecimal price, commissions;
+			int item_id
 				
 			try {
 				ResultSet rs = pstmt.executeQuery()
 				while(rs.next()) {
-					item_id = rs.getString("item_id");
-					description = rs.getInt("category");
-					bid_price = rs.getBigDecimal("bid_price");
-					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id+"\t"+description+"\t"+username+"\t"+bid_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					item_id = rs.getInt("item_id");
+					category = Category.getCategory(rs.getInt("category"));
+					buyer_id = rs.getString("buyer_id");
+					price = rs.getBigDecimal("price");
+					commissions = price.divede(new BigDecimal("10"));
+					sold_date = rs.getTimestamp("sold_date");
+					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+price.toString()+"\t"+buyer_id+"\t"+commissions.toString());
 				}
 				rs.close();
 			}
@@ -761,11 +818,30 @@ public class Auction {
 		System.out.println("[Purchased Items] \n");
 		System.out.println("item category  | item ID   | purchased date | puchased price  | seller ID ");
 		System.out.println("--------------------------------------------------------------------------");
-		/*
-		   while(rset.next(){
-		   System.out.println();
-		   }
-		 */
+		String query = "SELECT i.category, b.item_id, b.sold_date, b.price, b.seller_id FROM Billing as b JOIN Items as i ON b.item_id = i.item_id WHERE b.buyer_id=?";
+		try {
+			PreparedStatement pstmt = connection.prepareStatement(query);
+			pstmt.setString(1, username);
+			String buyer_id;
+			Category category;
+			Timestamp sold_date;
+			BigDecimal price;
+			int item_id;
+				
+			try {
+				ResultSet rs = pstmt.executeQuery()
+				while(rs.next()) {
+					item_id = rs.getInt("item_id");
+					category = Category.getCategory(rs.getInt("category"));
+					buyer_id = rs.getString("seller_id");
+					price = rs.getBigDecimal("price");
+					sold_date = rs.getTimestamp("sold_date");
+					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+price.toString()+"\t"+seller_id+"\t");
+				}
+				rs.close();
+			}
+			pstmt.close();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -780,7 +856,7 @@ public class Auction {
 
 		try{
             //    	conn = DriverManager.getConnection("jdbc:postgresql://localhost/"+args[0], args[0], args[1]); 
-            Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost/"+args[0], args[0], args[1]);
+            connection = DriverManager.getConnection("jdbc:postgresql://localhost/"+args[0], args[0], args[1]);
 		}
 		catch(SQLException e){
 			System.out.println("SQLException : " + e);	
@@ -822,7 +898,7 @@ public class Auction {
 					case 'Q':
 						System.out.println("Good Bye");
 						/* TODO: close the connection and clean up everything here */
-						conn.close();
+						connection.close();
 						System.exit(1);
 					default:
 						System.out.println("Error: Invalid input is entered. Try again.");
@@ -874,8 +950,7 @@ public class Auction {
 					case 'q':
 					case 'Q':
 						System.out.println("Good Bye");
-						/* TODO: close the connection and clean up everything here */
-						conn.close();
+						connection.close();
 						System.exit(1);
 				}
 			} catch (SQLException e) {
