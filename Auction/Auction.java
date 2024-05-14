@@ -45,8 +45,8 @@ class UpdateDB implements Runnable {
 						item_ids.offer(rs.getInt("item_id"));
 					}
 					rs.close();
-					pstmt.close();
 				}
+				pstmt.close();
 			}
 
 			while(!item_ids.isEmpty()) {
@@ -808,8 +808,21 @@ public class Auction {
 		}
 
 		int item_id = Integer.parseInt(choice);
+		BigDecimal buy_it_now_price, bid_price;
+		String find_query = "SELECT i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price FROM Items as i JOIN Bids as b ON i.item_id=b.item_id WHERE item_id = ?";
+		try {
+			PreparedStatement pstmt = connection.prepareStatement(find_query);
+			try {
+				ResultSet rs = pstmt.executeQuery()
+				while(rs.next()) {
+					buy_it_now_price = rs.getBigDecimal("buy_it_now_price");
+				}
+				rs.close();
+			}
+			pstmt.close();
+		}
 
-		
+		if ()
 		
 		System.out.println("Congratulations, the item is yours now.\n"); 
                 /* TODO: if you are the current highest bidder, print the following */
