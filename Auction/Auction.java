@@ -10,6 +10,89 @@ import java.text. *;
 import java.util. *;
 import java.math. *;
 
+
+class UpdateDB implements Runnable {
+	private static Connection connection;
+	private GlobalData global_data;
+
+	public Worker(GlobalData global_data) {
+		this.global_data = global_data;
+	}
+
+    public void run() {
+        try{
+            connection = DriverManager.getConnection("jdbc:postgresql://localhost/"+args[0], args[0], args[1]);
+		}
+		catch(SQLException e){
+			System.out.println("SQLException : " + e);	
+			System.exit(1);
+		}
+
+		Queue<Integer> item_ids = new LinkedList<>();
+		String find_query = "SELECT item_id FROM Items WHERE bid_closing_date < NOW()";
+		String delete_query = "DELET FROM Bids WHERE item_id=?";
+		String insert_query = "INSERT INTO Billing (item_id, sold_date, seller_id, buyer_id, price) " +
+							  "SELECT b.item_id, NOW(), i.seller_id, b.bidder_id, b.bid_price " +
+							  "FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
+
+		while(!global_data.getAuctionOver()) {
+			try {
+				PreparedStatement pstmt = connection.prepareStatement(find_query);
+
+				try {
+					ResultSet rs = pstmt.executeQuery()
+					while(rs.next()) {
+						item_ids.offer(rs.getInt("item_id"));
+					}
+					rs.close();
+					pstmt.close();
+				}
+			}
+
+			while(!item_ids.isEmpty()) {
+				int item_id = item_ids.poll();
+				try {
+					PreparedStatement pstmt = connection.prepareStatement(insert_query);
+					pstmt.setInt(1, item_id);
+					if (int rowsAffected = pstmt.executeUpdate() == 0){;}
+					pstmt.close();
+
+					PreparedStatement pstmt = connection.prepareStatement(delete_query);
+					pstmt.setInt(1, item_id);
+					if (int rowsAffected = pstmt.executeUpdate() == 0){;}
+					pstmt.close();
+				}
+			}
+
+			connection.close();
+			global_data.setAuctionOver(true);
+		}
+	}
+}
+
+
+class GlobalData {
+    private boolean is_auction_over=false;
+	private boolean is_update_over=false;
+
+    public synchronized Integer getUpdateOver() {
+        return this.is_update_over;
+    }
+
+	public synchronized Integer getAuctionOver() {
+        return this.is_auction_over;
+    }
+
+    public synchronized void setUpdateOver(boolean data) {
+        this.is_auction_over = data;
+    }
+
+    public synchronized void setAuctionOver(boolean data) {
+        this.is_auction_over = data;
+    }
+}
+
+
 public class Auction {
 	private static Scanner scanner = new Scanner(System.in);
 	private static String username;
@@ -667,6 +750,7 @@ public class Auction {
 
 			System.out.println("---- Enter date posted (YYYY-MM-DD): ");
 			System.out.println(" ** This will search items that have been posted after the designated date.");
+			System.out.println(" ** Enter 'any' if you want to see items for all dates. ");
 			datePosted = scanner.next();
 			scanner.nextLine();
 		} catch (java.util.InputMismatchException e) {
@@ -677,12 +761,43 @@ public class Auction {
 		System.out.println("Item ID | Item description | Condition | Seller | Buy-It-Now | Current Bid | highest bidder | Time left | bid close");
 		System.out.println("-------------------------------------------------------------------------------------------------------");
 		
+		String query = "SELECT i.item_id as item_id, i.description as description, i.condition as condition, i.seller_id as seller_id, i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price, b.bidder_id as bidder_id, (NOW() - i.bid_closing_date) as time_left, i.bid_closing_date as bid_closing_date FROM Items as i LEFT JOIN Bids as b ON i.item_id = b.item_id WHERE i.category=? AND i.condition=? AND i.description ILIKE ?";
 		
+		if (!(seller.equals("any"))) {
+			query = query.concat(" AND i.seller_id=?")
+		}
+		if (!(datePosted.equals("any"))) {
+			query = query.concat(" AND i.date_posted>=?")
+		}
+		try {
+			PreparedStatement pstmt = connection.prepareStatement(query);
+			pstmt.setString(1, username);
+			String description, seller_id, bidder_id;
+			Timestamp bid_closing_date, left_time;
+			BigDecimal bid_price, time_left;
+			int item_id;
+				
+			try {
+				ResultSet rs = pstmt.executeQuery()
+				while(rs.next()) {
+					item_id = rs.getInt("item_id");
+					description = rs.getString("description");
+					seller_id = rs.getString("seller_id");
+					bidder_id = rs.getString("bidder_id");
+					bid_price = rs.getBigDecimal("bid_price");
+					time_left = rs.getTimestamp("time_left");
+					bid_closing_date = rs.getTimestamp("bid_closing_date");
+					System.out.println(item_id.toString()+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+bid_price.toString()+"\t"+bidder_id+"\t"+bid_closing_date.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+				}
+				rs.close();
+			}
+			pstmt.close();
+		}
 
 		System.out.println("---- Select Item ID to buy or bid: ");
 
 		try {
-			choice = scanner.next().charAt(0);;
+			choice = scanner.nextLine();
 			scanner.nextLine();
 			System.out.println("     Price: ");
 			price = scanner.nextInt();
@@ -692,10 +807,10 @@ public class Auction {
 			return false;
 		}
 
-		/* TODO: Buy-it-now or bid: If the entered price is higher or equal to Buy-It-Now price, the bid ends. */
-		/* Even if the bid price is higher than the Buy-It-Now price, the buyer pays the B-I-N price. */
+		int item_id = Integer.parseInt(choice);
 
-                /* TODO: if you won, print the following */
+		
+		
 		System.out.println("Congratulations, the item is yours now.\n"); 
                 /* TODO: if you are the current highest bidder, print the following */
 		System.out.println("Congratulations, you are the highest bidder.\n"); 
@@ -757,7 +872,7 @@ public class Auction {
 			pstmt.close();
 		}
 
-		String query = "SELECT o.item_id as item_id,  i.description as dscription, b.buyer_id as highest_bidder, b.price as highest_price, o.bid_price as bid_price b.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Billing as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
+		String query = "SELECT o.item_id as item_id,  i.description as dscription, b.buyer_id as highest_bidder, b.price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Billing as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
@@ -847,6 +962,7 @@ public class Auction {
 	public static void main(String[] args) {
 		char choice;
 		boolean ret;
+		GlobalData global_data = new GlobalData();
 
 		if(args.length<2){
 			System.out.println("Usage: java Auction postgres_id password");
@@ -862,6 +978,11 @@ public class Auction {
 			System.out.println("SQLException : " + e);	
 			System.exit(1);
 		}
+
+		global_data.setAuctionOver(false);
+		global_data.setUpdateOver(false);
+		Thread workerThread = new Thread(new Worker(global_data));
+        workerThread.start();
 
 		do {
 			username = null;
@@ -899,6 +1020,8 @@ public class Auction {
 						System.out.println("Good Bye");
 						/* TODO: close the connection and clean up everything here */
 						connection.close();
+						global_data.setAuctionOver(true);
+						while(!global_data.getUpdateOver()) {;}
 						System.exit(1);
 					default:
 						System.out.println("Error: Invalid input is entered. Try again.");
@@ -951,10 +1074,15 @@ public class Auction {
 					case 'Q':
 						System.out.println("Good Bye");
 						connection.close();
+						global_data.setAuctionOver(true);
+						while(!global_data.getUpdateOver()) {;}
 						System.exit(1);
 				}
 			} catch (SQLException e) {
 				System.out.println("SQLException : " + e);	
+				connection.close();
+				global_data.setAuctionOver(true);
+				while(!global_data.getUpdateOver()) {;}
 				System.exit(1);
 			}
 		} while(true);
