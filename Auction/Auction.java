@@ -78,10 +78,10 @@ class UpdateDB implements Runnable {
 					continue ;
 				}
 			}
-
-			connection.close();
-			global_data.setAuctionOver(true);
 		}
+
+		connection.close();
+		global_data.setAuctionOver(true);
 	}
 }
 
@@ -351,7 +351,8 @@ public class Auction {
 			pstmt.setInt(3, condition.getValue());
 			pstmt.setString(4, username);
 			pstmt.setBigDecimal(5, set_price);
-			pstmt.setTimestamp(6, dateTime);
+			Timestamp timestamp = Timestamp.valueOf(dateTime);
+			pstmt.setTimestamp(6, timestamp);
 
 			int rowsAffected = pstmt.executeUpdate();
 			if (rowsAffected != 0) {
@@ -852,7 +853,7 @@ public class Auction {
 			pstmt.setString(1, username);
 			String description, seller_id, bidder_id;
 			Timestamp bid_closing_date, time_left;
-			BigDecimal bid_price;
+			BigDecimal bid_price, buy_it_now_price;
 			int item_id;
 				
 			try {
@@ -862,10 +863,11 @@ public class Auction {
 					description = rs.getString("description");
 					seller_id = rs.getString("seller_id");
 					bidder_id = rs.getString("bidder_id");
+					buy_it_now_price = rs.getBigDecimal("buy_it_now_price");
 					bid_price = rs.getBigDecimal("bid_price");
 					time_left = rs.getTimestamp("time_left");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+String.valueOf(bid_price)+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+String.valueOf(buy_it_now_price)+"\t"+String.valueOf(bid_price)+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -873,7 +875,7 @@ public class Auction {
 				return false;
 			}
 			pstmt.close();
-		} catch (jSQLException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -1008,12 +1010,12 @@ public class Auction {
 				rs.close();
 			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
-				return false;
+				return ;
 			}
 			pstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
-			return false;
+			return ;
 		}
 
 		String query = "SELECT o.item_id as item_id,  i.description as dscription, b.bidder_id as highest_bidder, b.bid_price as highest_price, o.bid_price as bid_price b.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Bids as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
@@ -1047,7 +1049,7 @@ public class Auction {
 			return;
 		}
 
-		String query = "SELECT o.item_id as item_id,  i.description as dscription, b.buyer_id as highest_bidder, b.price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Billing as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
+		query = "SELECT o.item_id as item_id,  i.description as dscription, b.buyer_id as highest_bidder, b.price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Billing as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
