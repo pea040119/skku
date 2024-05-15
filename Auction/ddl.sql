@@ -1,11 +1,11 @@
-CREATE TABLE Users {
+CREATE TABLE Users (
     user_id VARCHAR(20) PRIMARY KEY,
     pwd VARCHAR(20) NOT NULL,
     is_admin BOOLEAN
-};
+);
 
 
-CREATE TABLE Items {
+CREATE TABLE Items (
     item_id SERIAL PRIMARY KEY,
     category INT NOT NULL,
     description VARCHAR(50),
@@ -17,10 +17,10 @@ CREATE TABLE Items {
     FOREIGN KEY (seller_id) REFERENCES Users(user_id),
     CONSTRAINT category_check CHECK (category BETWEEN 1 AND 7),
     CONSTRAINT condition_check CHECK (condition BETWEEN 1 AND 4)
-};
+);
 
 
-CREATE TABLE Bids {
+CREATE TABLE Bids (
     bid_id SERIAL PRIMARY KEY,
     item_id INT NOT NULL,
     bid_price NUMERIC(10, 2) NOT NULL,
@@ -29,10 +29,10 @@ CREATE TABLE Bids {
     bid_closing_date TIMESTAMPTZ,
     FOREIGN KEY (item_id, bid_closing_date) REFERENCES Items(item_id, bid_closing_date),
     FOREIGN KEY (bidder_id) REFERENCES Users(user_id)
-};
+);
 
 
-CREATE TABLE OldBids {
+CREATE TABLE OldBids (
     bid_id SERIAL PRIMARY KEY,
     item_id INT NOT NULL,
     bid_price NUMERIC(10, 2) NOT NULL,
@@ -41,10 +41,10 @@ CREATE TABLE OldBids {
     bid_closing_date TIMESTAMPTZ,
     FOREIGN KEY (item_id, bid_closing_date) REFERENCES Items(item_id, bid_closing_date),
     FOREIGN KEY (bidder_id) REFERENCES Users(user_id)
-};
+);
 
 
-CREATE TABLE Billing {
+CREATE TABLE Billing (
     transaction_id SERIAL PRIMARY KEY,
     item_id INT NOT NULL,
     sold_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -54,4 +54,4 @@ CREATE TABLE Billing {
     FOREIGN KEY (item_id) REFERENCES Items(item_id),
     FOREIGN KEY (seller_id) REFERENCES Users(user_id),
     FOREIGN KEY (buyer_id) REFERENCES Users(user_id)
-};
+);
