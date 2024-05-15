@@ -49,12 +49,12 @@ class UpdateDB implements Runnable {
 						item_ids.offer(rs.getInt("item_id"));
 					}
 					rs.close();
-				} catch (java.util.InputMismatchException e) {
+				} catch (SQLException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
 					continue;
 				}
 				pstmt.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				continue ;
 			}
@@ -73,7 +73,7 @@ class UpdateDB implements Runnable {
 					rowsAffected = pstmt.executeUpdate();
 					if (rowsAffected == 0){;}
 					pstmt.close();
-				} catch (java.util.InputMismatchException e) {
+				} catch (SQLException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
 					continue ;
 				}
@@ -194,12 +194,12 @@ public class Auction {
 					login_success = true;
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -362,7 +362,7 @@ public class Auction {
 			}
 			
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -407,12 +407,12 @@ public class Auction {
 					is_unique_name = true;
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -436,12 +436,12 @@ public class Auction {
 					is_unique_name = true;
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -490,12 +490,12 @@ public class Auction {
 					login_success = true;
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -551,13 +551,13 @@ public class Auction {
 							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+seller_id+"\t"+buyer_id+"\t"+String.valueOf(price)+"\t"+String.valueOf(commissions));
 						} 
 						rs.close();
-					} catch (java.util.InputMismatchException e) {
+					} catch (SQLException e) {
 						System.out.println("Error: Invalid input is entered. Please select again.");
 						return false;
 					}
 					pstmt.close();
 				}
-				catch (java.util.InputMismatchException e) {
+				catch (SQLException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
 					return false;
 				}
@@ -591,12 +591,12 @@ public class Auction {
 							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+buyer_id+"\t"+String.valueOf(price)+"\t"+String.valueOf(commissions));
 						}
 						rs.close();
-					} catch (java.util.InputMismatchException e) {
+					} catch (SQLException e) {
 						System.out.println("Error: Invalid input is entered. Please select again.");
 						return false;
 					}
 					pstmt.close();
-				} catch (java.util.InputMismatchException e) {
+				} catch (SQLException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
 					return false;
 				}
@@ -624,12 +624,12 @@ public class Auction {
 							System.out.println(seller_id+"\t"+num_item.toString()+"\t"+String.valueOf(total_price));
 						}
 						rs.close();
-					} catch (java.util.InputMismatchException e) {
+					} catch (SQLException e) {
 						System.out.println("Error: Invalid input is entered. Please select again.");
 						return false;
 					}
 					pstmt.close();
-				} catch (java.util.InputMismatchException e) {
+				} catch (SQLException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
 					return false;
 				}
@@ -656,12 +656,12 @@ public class Auction {
 							System.out.println(buyer_id+"\t"+num_item.toString()+"\t"+String.valueOf(total_price));
 						}
 						rs.close();
-					} catch (java.util.InputMismatchException e) {
+					} catch (SQLException e) {
 						System.out.println("Error: Invalid input is entered. Please select again.");
 						return false;
 					}
 					pstmt.close();
-				} catch (java.util.InputMismatchException e) {
+				} catch (SQLException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
 					return false;
 				}
@@ -699,12 +699,12 @@ public class Auction {
 					System.out.println(item_id.toString()+"\t"+bidder_id+"\t"+String.valueOf(bid_price)+"\t"+bid_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return;
 		}
@@ -868,12 +868,12 @@ public class Auction {
 					System.out.println(item_id.toString()+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+String.valueOf(bid_price)+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (jSQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -906,12 +906,12 @@ public class Auction {
 					right_choice = true;
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -945,7 +945,7 @@ public class Auction {
 				rowsAffected = pstmt.executeUpdate();
 				if (rowsAffected == 0){;}
 				pstmt.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
@@ -969,7 +969,7 @@ public class Auction {
 				rowsAffected = pstmt.executeUpdate();
 				if (rowsAffected == 0){;}
 				pstmt.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
@@ -1006,12 +1006,12 @@ public class Auction {
 					System.out.println(item_id.toString()+"\t"+description+"\t"+username+"\t"+String.valueOf(bid_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return false;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return false;
 		}
@@ -1037,12 +1037,12 @@ public class Auction {
 					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return;
 		}
@@ -1068,12 +1068,12 @@ public class Auction {
 					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return;
 		}
@@ -1107,12 +1107,12 @@ public class Auction {
 					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+String.valueOf(price)+"\t"+buyer_id+"\t"+String.valueOf(commissions));
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return;
 		}
@@ -1141,12 +1141,12 @@ public class Auction {
 					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+String.valueOf(price)+"\t"+seller_id+"\t");
 				}
 				rs.close();
-			} catch (java.util.InputMismatchException e) {
+			} catch (SQLException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
 				return;
 			}
 			pstmt.close();
-		} catch (java.util.InputMismatchException e) {
+		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
 			return;
 		}
