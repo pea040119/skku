@@ -23,14 +23,14 @@ INSERT INTO Items(category, description, condition, seller_id, buy_it_now_price,
 INSERT INTO Items(category, description, condition, seller_id, buy_it_now_price, date_posted, bid_closing_date) VALUES (6, 'min_item9', 1, 'min', 0.50, NOW(), '2025-05-15 00:00:00');
 
 
-INSERT INTO Bids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 10.00, 'seo', NOW(), i.buy_it_now_price FROM Items as i WHERE i.description = 'pea_item7';
-INSERT INTO Bids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 10.00, 'seo', NOW(), i.buy_it_now_price FROM Items as i WHERE i.description = 'pea_item8';
-INSERT INTO Bids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 10.00, 'seo', NOW(), i.buy_it_now_price FROM Items as i WHERE i.description = 'pea_item9';
+INSERT INTO Bids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 10.00, 'seo', NOW() FROM Items as i WHERE i.description = 'pea_item7';
+INSERT INTO Bids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 10.00, 'seo', NOW() FROM Items as i WHERE i.description = 'pea_item8';
+INSERT INTO Bids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 10.00, 'seo', NOW() FROM Items as i WHERE i.description = 'pea_item9';
 
 
-INSERT INTO OldBids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 5.00, 'min', NOW(), i.buy_it_now_price FROM Items as i WHERE i.description = 'pea_item7';
-INSERT INTO OldBids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 5.00, 'min', NOW(), i.buy_it_now_price FROM Items as i WHERE i.description = 'pea_item8';
-INSERT INTO OldBids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 5.00, 'min', NOW(), i.buy_it_now_price FROM Items as i WHERE i.description = 'pea_item9';
+INSERT INTO OldBids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 5.00, 'min', NOW() FROM Items as i WHERE i.description = 'pea_item7';
+INSERT INTO OldBids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 5.00, 'min', NOW() FROM Items as i WHERE i.description = 'pea_item8';
+INSERT INTO OldBids(item_id, bid_price, bidder_id, date_posted) SELECT i.item_id, 5.00, 'min', NOW() FROM Items as i WHERE i.description = 'pea_item9';
 
 INSERT INTO Billing(item_id, sold_date, seller_id, buyer_id, price) SELECT i.item_id, NOW(), i.seller_id, 'pea', 20.00 FROM Items as i WHERE i.description = 'min_item7';
 INSERT INTO Billing(item_id, sold_date, seller_id, buyer_id, price) SELECT i.item_id, NOW(), i.seller_id, 'pea', 20.00 FROM Items as i WHERE i.description = 'min_item8';

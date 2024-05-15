@@ -928,14 +928,17 @@ public class Auction {
 			return false;
 		}
 
+		BigDecimal new_price = BigDecimal.valueOf(price);
+
 		if (bid_price == null) {
-			String insert_query = "INSERT INTO Billing (item_id, sold_date, seller_id, buyer_id, price) " +
-								"SELECT b.item_id, NOW(), i.seller_id, b.bidder_id, b.bid_price " +
-								"FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
+			String insert_new_query = "INSERT INTO Bids (item_id, bid_price, bidder_id, date_posted) " +
+									  "SELECT ?, ?, ?, NOW() ";
 			
 			try {
-				PreparedStatement pstmt = connection.prepareStatement(insert_query);
+				PreparedStatement pstmt = connection.prepareStatement(insert_new_query);
 				pstmt.setInt(1, item_id);
+				pstmt.setBigDecimal(2, new_price);
+				pstmt.setString(3, username);
 				int rowsAffected = pstmt.executeUpdate();
 				if (rowsAffected == 0){;}
 				pstmt.close();
@@ -947,13 +950,13 @@ public class Auction {
 			System.out.println("Congratulations, the item is yours now.\n");
 		}
 
-		comparisonResult = bid_price.compareTo(BigDecimal.valueOf(price));
+		comparisonResult = bid_price.compareTo(new_price);
 		if (comparisonResult <= 0) {
 			System.out.println("Invalid price is entered. Try again.");
 			return false;
 		}
 
-		comparisonResult = buy_it_now_price.compareTo(BigDecimal.valueOf(price));
+		comparisonResult = buy_it_now_price.compareTo(new_price);
 		if (comparisonResult <= 0) {
 			String delete_query = "DELET FROM Bids WHERE item_id=?";
 			String insert_query = "INSERT INTO Billing (item_id, sold_date, seller_id, buyer_id, price) " +
@@ -980,12 +983,14 @@ public class Auction {
 			System.out.println("Congratulations, the item is yours now.\n");
 		} else {
 			String delete_query = "DELET FROM Bids WHERE item_id=?";
-			String insert_query = "INSERT INTO OldBids (item_id, bid_price, bidder_id, date_posted) " +
-								"SELECT b.item_id, b.bid_price, b.bidder_id, b.date_posted " +
-								"FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
+			String insert_old_query = "INSERT INTO OldBids (item_id, bid_price, bidder_id, date_posted) " +
+									  "SELECT b.item_id, b.bid_price, b.bidder_id, b.date_posted " +
+									  "FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
+			String insert_new_query = "INSERT INTO Bids (item_id, bid_price, bidder_id, date_posted) " +
+									  "SELECT ?, ?, ?, NOW() ";
 			
 			try {
-				PreparedStatement pstmt = connection.prepareStatement(insert_query);
+				PreparedStatement pstmt = connection.prepareStatement(insert_old_query);
 				pstmt.setInt(1, item_id);
 				int rowsAffected = pstmt.executeUpdate();
 				if (rowsAffected == 0){;}
@@ -993,6 +998,14 @@ public class Auction {
 
 				pstmt = connection.prepareStatement(delete_query);
 				pstmt.setInt(1, item_id);
+				rowsAffected = pstmt.executeUpdate();
+				if (rowsAffected == 0){;}
+				pstmt.close();
+
+				pstmt = connection.prepareStatement(delete_query);
+				pstmt.setInt(1, item_id);
+				pstmt.setBigDecimal(2, new_price);
+				pstmt.setString(3, username);
 				rowsAffected = pstmt.executeUpdate();
 				if (rowsAffected == 0){;}
 				pstmt.close();
