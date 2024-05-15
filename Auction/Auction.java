@@ -807,8 +807,9 @@ public class Auction {
 			return false;
 		}
 
-		int item_id = Integer.parseInt(choice);
+		int comparisonResult, item_id = Integer.parseInt(choice);
 		BigDecimal buy_it_now_price, bid_price;
+		boolean right_choice = false;
 		String find_query = "SELECT i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price FROM Items as i JOIN Bids as b ON i.item_id=b.item_id WHERE item_id = ?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(find_query);
@@ -816,17 +817,65 @@ public class Auction {
 				ResultSet rs = pstmt.executeQuery()
 				while(rs.next()) {
 					buy_it_now_price = rs.getBigDecimal("buy_it_now_price");
+					bid_price = rs.getBigDecimal("bid_price");
+					right_choice = true;
 				}
 				rs.close();
 			}
 			pstmt.close();
 		}
+		if (!right_choice) {
+			System.out.println("Invalid choice is entered. Try again.");
+			return false;
+		}
 
-		if ()
+		comparisonResult = bid_price.compareTo(BigDecimal.valueOf(price));
+		if (comparisonResult <= 0) {
+			System.out.println("Invalid price is entered. Try again.");
+			return false;
+		}
+
+		comparisonResult = buy_it_now_price.compareTo(BigDecimal.valueOf(price));
+		if (comparisonResult <= 0) {
+			String delete_query = "DELET FROM Bids WHERE item_id=?";
+			String insert_query = "INSERT INTO Billing (item_id, sold_date, seller_id, buyer_id, price) " +
+								"SELECT b.item_id, NOW(), i.seller_id, b.bidder_id, b.bid_price " +
+								"FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
+			
+			try {
+				PreparedStatement pstmt = connection.prepareStatement(insert_query);
+				pstmt.setInt(1, item_id);
+				if (int rowsAffected = pstmt.executeUpdate() == 0){;}
+				pstmt.close();
+
+				PreparedStatement pstmt = connection.prepareStatement(delete_query);
+				pstmt.setInt(1, item_id);
+				if (int rowsAffected = pstmt.executeUpdate() == 0){;}
+				pstmt.close();
+			}
+
+			System.out.println("Congratulations, the item is yours now.\n");
+		} else {
+			String delete_query = "DELET FROM Bids WHERE item_id=?";
+			String insert_query = "INSERT INTO OldBids (item_id, bid_price, bidder_id, date_posted, bid_closing_date) " +
+								"SELECT b.item_id, b.bid_price, b.bidder_id, b.date_posted, b.bid_closing_date " +
+								"FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
+			
+			try {
+				PreparedStatement pstmt = connection.prepareStatement(insert_query);
+				pstmt.setInt(1, item_id);
+				if (int rowsAffected = pstmt.executeUpdate() == 0){;}
+				pstmt.close();
+
+				PreparedStatement pstmt = connection.prepareStatement(delete_query);
+				pstmt.setInt(1, item_id);
+				if (int rowsAffected = pstmt.executeUpdate() == 0){;}
+				pstmt.close();
+			}
+
+			System.out.println("Congratulations, you are the highest bidder.\n"); 
+		}
 		
-		System.out.println("Congratulations, the item is yours now.\n"); 
-                /* TODO: if you are the current highest bidder, print the following */
-		System.out.println("Congratulations, you are the highest bidder.\n"); 
 		return true;
 	}
 

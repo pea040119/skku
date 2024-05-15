@@ -34,7 +34,7 @@ CREATE TABLE Bids {
 
 CREATE TABLE OldBids {
     bid_id SERIAL PRIMARY KEY,
-    item_id VINT NOT NULL,
+    item_id INT NOT NULL,
     bid_price NUMERIC(10, 2) NOT NULL,
     bidder_id VARCHAR(20) NOT NULL,
     date_posted TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
