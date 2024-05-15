@@ -68,9 +68,9 @@ class UpdateDB implements Runnable {
 					if (rowsAffected == 0){;}
 					pstmt.close();
 
-					PreparedStatement pstmt = connection.prepareStatement(delete_query);
+					pstmt = connection.prepareStatement(delete_query);
 					pstmt.setInt(1, item_id);
-					int rowsAffected = pstmt.executeUpdate();
+					rowsAffected = pstmt.executeUpdate();
 					if (rowsAffected == 0){;}
 					pstmt.close();
 				} catch (java.util.InputMismatchException e) {
@@ -586,7 +586,7 @@ public class Auction {
 							item_id = rs.getInt("item_id");
 							buyer_id = rs.getString("buyer_id");
 							price = rs.getBigDecimal("price");
-							commissions = price.divede(new BigDecimal("10"));
+							commissions = price.divide(new BigDecimal("10"));
 							sold_date = rs.getTimestamp("sold_date");
 							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+buyer_id+"\t"+price.toString()+"\t"+commissions.toString());
 						}
@@ -701,12 +701,12 @@ public class Auction {
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
-				return false;
+				return;
 			}
 			pstmt.close();
 		} catch (java.util.InputMismatchException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
-			return false;
+			return;
 		}
 
 	}
@@ -851,8 +851,8 @@ public class Auction {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
 			String description, seller_id, bidder_id;
-			Timestamp bid_closing_date, left_time;
-			BigDecimal bid_price, time_left;
+			Timestamp bid_closing_date, time_left;
+			BigDecimal bid_price;
 			int item_id;
 				
 			try {
@@ -865,7 +865,7 @@ public class Auction {
 					bid_price = rs.getBigDecimal("bid_price");
 					time_left = rs.getTimestamp("time_left");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+bid_price.toString()+"\t"+bidder_id+"\t"+bid_closing_date.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+bid_price.toString()+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
@@ -880,8 +880,9 @@ public class Auction {
 
 		System.out.println("---- Select Item ID to buy or bid: ");
 
+		String item_id_str;
 		try {
-			choice = scanner.nextLine();
+			item_id_str = scanner.nextLine();
 			scanner.nextLine();
 			System.out.println("     Price: ");
 			price = scanner.nextInt();
@@ -891,7 +892,7 @@ public class Auction {
 			return false;
 		}
 
-		int comparisonResult, item_id = Integer.parseInt(choice);
+		int comparisonResult, item_id = Integer.parseInt(item_id_str);
 		BigDecimal buy_it_now_price, bid_price;
 		boolean right_choice = false;
 		String find_query = "SELECT i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price FROM Items as i JOIN Bids as b ON i.item_id=b.item_id WHERE item_id = ?";
@@ -939,9 +940,9 @@ public class Auction {
 				if (rowsAffected == 0){;}
 				pstmt.close();
 
-				PreparedStatement pstmt = connection.prepareStatement(delete_query);
+				pstmt = connection.prepareStatement(delete_query);
 				pstmt.setInt(1, item_id);
-				int rowsAffected = pstmt.executeUpdate();
+				rowsAffected = pstmt.executeUpdate();
 				if (rowsAffected == 0){;}
 				pstmt.close();
 			} catch (java.util.InputMismatchException e) {
@@ -963,9 +964,9 @@ public class Auction {
 				if (rowsAffected == 0){;}
 				pstmt.close();
 
-				PreparedStatement pstmt = connection.prepareStatement(delete_query);
+				pstmt = connection.prepareStatement(delete_query);
 				pstmt.setInt(1, item_id);
-				int rowsAffected = pstmt.executeUpdate();
+				rowsAffected = pstmt.executeUpdate();
 				if (rowsAffected == 0){;}
 				pstmt.close();
 			} catch (java.util.InputMismatchException e) {
@@ -1038,12 +1039,12 @@ public class Auction {
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
-				return false;
+				return;
 			}
 			pstmt.close();
 		} catch (java.util.InputMismatchException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
-			return false;
+			return;
 		}
 
 		String query = "SELECT o.item_id as item_id,  i.description as dscription, b.buyer_id as highest_bidder, b.price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Billing as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
@@ -1069,12 +1070,12 @@ public class Auction {
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
-				return false;
+				return;
 			}
 			pstmt.close();
 		} catch (java.util.InputMismatchException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
-			return false;
+			return;
 		}
 	}
 
@@ -1108,12 +1109,12 @@ public class Auction {
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
-				return false;
+				return;
 			}
 			pstmt.close();
 		} catch (java.util.InputMismatchException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
-			return false;
+			return;
 		}
 		
 		System.out.println("[Purchased Items] \n");
@@ -1123,7 +1124,7 @@ public class Auction {
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String buyer_id;
+			String seller_id;
 			Category category;
 			Timestamp sold_date;
 			BigDecimal price;
@@ -1134,7 +1135,7 @@ public class Auction {
 				while(rs.next()) {
 					item_id = rs.getInt("item_id");
 					category = Category.getCategory(rs.getInt("category"));
-					buyer_id = rs.getString("seller_id");
+					seller_id = rs.getString("seller_id");
 					price = rs.getBigDecimal("price");
 					sold_date = rs.getTimestamp("sold_date");
 					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+price.toString()+"\t"+seller_id+"\t");
@@ -1142,12 +1143,12 @@ public class Auction {
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
-				return false;
+				return;
 			}
 			pstmt.close();
 		} catch (java.util.InputMismatchException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
-			return false;
+			return;
 		}
 	}
 
@@ -1173,7 +1174,7 @@ public class Auction {
 
 		global_data.setAuctionOver(false);
 		global_data.setUpdateOver(false);
-		Thread workerThread = new Thread(new UpdateDB(global_data));
+		Thread workerThread = new Thread(new UpdateDB(global_data, args[0], args[1]));
         workerThread.start();
 
 		do {
