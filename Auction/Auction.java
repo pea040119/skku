@@ -186,7 +186,7 @@ public class Auction {
 		}
 
 		boolean login_success = false;
-		String query_login = "SELECT pwd FROM Users WHERE (user_name=?) AND (pwd=?)";
+		String query_login = "SELECT pwd FROM Users WHERE (user_id=?) AND (pwd=?)";
 
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query_login);
@@ -318,13 +318,13 @@ public class Auction {
 			}
 		}while(!flag_cond);
 
-		String description;
+		String desc;
 		BigDecimal set_price;
 		LocalDateTime dateTime;
 
 		try {
-			System.out.println("---- Description of the item (one line): ");
-			description = scanner.nextLine();
+			System.out.println("---- desc of the item (one line): ");
+			desc = scanner.nextLine();
 			System.out.println("---- Buy-It-Now price: ");
 
 			while (!scanner.hasNextInt()) {
@@ -346,12 +346,12 @@ public class Auction {
 		}
 
 		boolean is_success = false;
-		String query = "INSERT INTO Items (category, description, condition, seller_id, buy_it_now_price, bid_closing_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+		String query = "INSERT INTO Items (category, desc, condition, seller_id, buy_it_now_price, bid_closing_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			
 			pstmt.setInt(1, category.getValue());
-			pstmt.setString(2, description);
+			pstmt.setString(2, desc);
 			pstmt.setInt(3, condition.getValue());
 			pstmt.setString(4, username);
 			pstmt.setBigDecimal(5, set_price);
@@ -400,8 +400,8 @@ public class Auction {
 
 		boolean signup_success = false;
 		boolean is_unique_name = false;
-		String query_check_name = "SELECT user_id FROM Users WHERE user_name=?";
-		String query_signup = "INSERT INTO Users(user_name, pwd, is_admin) VALUES(?, ? ,?)";
+		String query_check_name = "SELECT user_id FROM Users WHERE user_id=?";
+		String query_signup = "INSERT INTO Users(user_id, pwd, is_admin) VALUES(?, ? ,?)";
 
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query_check_name);
@@ -483,7 +483,7 @@ public class Auction {
 		}
 
 		boolean login_success = true;
-		String query_login = "SELECT pwd FROM Users WHERE (user_name=?) and (pwd=?) and (is_admin=true)";
+		String query_login = "SELECT pwd FROM Users WHERE (user_id=?) and (pwd=?) and (is_admin=true)";
 
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query_login);
@@ -612,7 +612,7 @@ public class Auction {
 				System.out.println("seller ID   | # of items sold | Total Profit (excluding commissions)");
 				System.out.println("--------------------------------------------------------------------");
 
-				String query = "SELECT seller_id, COUNT(item_id) as num_item, SUM(price) as total_price FROM Billing GROUP BY seller_id ORDER BY total_price DESC";
+				String query = "SELECT seller_id, COUNT(item_id) as num_item, SUM(price) as total_price FROM Billing GROUP BY seller_id ORDER BY total_pricedesc";
 				try {
 					PreparedStatement pstmt = connection.prepareStatement(query);
 					String seller_id;
@@ -645,7 +645,7 @@ public class Auction {
 				System.out.println("buyer ID   | # of items purchased | Total Money Spent ");
 				System.out.println("------------------------------------------------------");
 				
-				String query = "SELECT buyer_id, COUNT(item_id) as num_item, SUM(price) as total_price FROM Billing GROUP BY buyer_id ORDER BY total_price DESC";
+				String query = "SELECT buyer_id, COUNT(item_id) as num_item, SUM(price) as total_price FROM Billing GROUP BY buyer_id ORDER BY total_pricedesc";
 				try {
 					PreparedStatement pstmt = connection.prepareStatement(query);
 					String buyer_id;
@@ -822,7 +822,7 @@ public class Auction {
 		} while(!flag_cond);
 
 		try {
-			System.out.println("---- Enter keyword to search the description : ");
+			System.out.println("---- Enter keyword to search the desc : ");
 			keyword = scanner.next();
 			scanner.nextLine();
 
@@ -841,10 +841,10 @@ public class Auction {
 			return false;
 		}
 
-		System.out.println("Item ID | Item description | Condition | Seller | Buy-It-Now | Current Bid | highest bidder | Time left | bid close");
+		System.out.println("Item ID | Item desc | Condition | Seller | Buy-It-Now | Current Bid | highest bidder | Time left | bid close");
 		System.out.println("-------------------------------------------------------------------------------------------------------");
 		
-		String query = "SELECT i.item_id as item_id, i.description as description, i.condition as condition, i.seller_id as seller_id, i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price, b.bidder_id as bidder_id, (NOW() - i.bid_closing_date) as time_left, i.bid_closing_date as bid_closing_date FROM Items as i LEFT JOIN Bids as b ON i.item_id = b.item_id WHERE i.category=? AND i.condition=? AND i.description ILIKE ?";
+		String query = "SELECT i.item_id as item_id, i.desc as desc, i.condition as condition, i.seller_id as seller_id, i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price, b.bidder_id as bidder_id, (NOW() - i.bid_closing_date) as time_left, i.bid_closing_date as bid_closing_date FROM Items as i LEFT JOIN Bids as b ON i.item_id = b.item_id WHERE i.category=? AND i.condition=? AND i.desc ILIKE ?";
 		
 		if (!(seller.equals("any"))) {
 			query = query.concat(" AND i.seller_id=?");
@@ -855,7 +855,7 @@ public class Auction {
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String description, seller_id, bidder_id;
+			String desc, seller_id, bidder_id;
 			Timestamp bid_closing_date, time_left;
 			BigDecimal bid_price, buy_it_now_price;
 			int item_id;
@@ -864,14 +864,14 @@ public class Auction {
 				ResultSet rs = pstmt.executeQuery();
 				while(rs.next()) {
 					item_id = rs.getInt("item_id");
-					description = rs.getString("description");
+					desc = rs.getString("desc");
 					seller_id = rs.getString("seller_id");
 					bidder_id = rs.getString("bidder_id");
 					buy_it_now_price = rs.getBigDecimal("buy_it_now_price");
 					bid_price = rs.getBigDecimal("bid_price");
 					time_left = rs.getTimestamp("time_left");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+String.valueOf(buy_it_now_price)+"\t"+String.valueOf(bid_price)+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+desc+"\t"+condition+"\t"+seller_id+"\t"+String.valueOf(buy_it_now_price)+"\t"+String.valueOf(bid_price)+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -1011,14 +1011,14 @@ public class Auction {
 		/* TODO: Check the status of the item the current buyer is bidding on */
 		/* Even if you are outbidded or the bid closing date has passed, all the items this user has bidded on must be displayed */
 
-		System.out.println("item ID   | item description   | highest bidder | highest bidding price | your bidding price | bid closing date/time");
+		System.out.println("item ID   | item desc   | highest bidder | highest bidding price | your bidding price | bid closing date/time");
 		System.out.println("--------------------------------------------------------------------------------------------------------------------");
 		
 		String query = "SELECT b.item_id, i.decription, b.bid_price i.bid_closing_date FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String description;
+			String desc;
 			Timestamp bid_closing_date;
 			BigDecimal bid_price;
 			int item_id;
@@ -1027,10 +1027,10 @@ public class Auction {
 				ResultSet rs = pstmt.executeQuery();
 				while(rs.next()) {
 					item_id = rs.getInt("item_id");
-					description = rs.getString("description");
+					desc = rs.getString("desc");
 					bid_price = rs.getBigDecimal("bid_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+username+"\t"+String.valueOf(bid_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+desc+"\t"+username+"\t"+String.valueOf(bid_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -1043,11 +1043,11 @@ public class Auction {
 			return ;
 		}
 
-		query = "SELECT o.item_id as item_id,  i.description as dscription, b.bidder_id as highest_bidder, b.bid_price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Bids as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
+		query = "SELECT o.item_id as item_id,  i.desc as dscription, b.bidder_id as highest_bidder, b.bid_price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Bids as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String description, highest_bidder;
+			String desc, highest_bidder;
 			Timestamp bid_closing_date;
 			BigDecimal bid_price, highest_price;
 			int item_id;
@@ -1056,12 +1056,12 @@ public class Auction {
 				ResultSet rs = pstmt.executeQuery();
 				while(rs.next()) {
 					item_id = rs.getInt("item_id");
-					description = rs.getString("description");
+					desc = rs.getString("desc");
 					highest_bidder = rs.getString("highest_bidder");
 					bid_price = rs.getBigDecimal("bid_price");
 					highest_price = rs.getBigDecimal("highest_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+desc+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -1074,11 +1074,11 @@ public class Auction {
 			return;
 		}
 
-		query = "SELECT o.item_id as item_id,  i.description as dscription, b.buyer_id as highest_bidder, b.price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Billing as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
+		query = "SELECT o.item_id as item_id,  i.desc as dscription, b.buyer_id as highest_bidder, b.price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Billing as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
-			String description, highest_bidder;
+			String desc, highest_bidder;
 			Timestamp bid_closing_date;
 			BigDecimal bid_price, highest_price;
 			int item_id;
@@ -1087,12 +1087,12 @@ public class Auction {
 				ResultSet rs = pstmt.executeQuery();
 				while(rs.next()) {
 					item_id = rs.getInt("item_id");
-					description = rs.getString("description");
+					desc = rs.getString("desc");
 					highest_bidder = rs.getString("highest_bidder");
 					bid_price = rs.getBigDecimal("bid_price");
 					highest_price = rs.getBigDecimal("highest_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+desc+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
