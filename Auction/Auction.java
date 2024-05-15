@@ -218,8 +218,8 @@ public class Auction {
 	}
 
 	private static boolean SellMenu() {
-		Category category;
-		Condition condition;
+		Category category = Category.ELECTRONICS;
+		Condition condition = Condition.NEW;
 		char choice;
 		int price;
 		boolean flag_catg = true, flag_cond = true;
@@ -919,6 +919,8 @@ public class Auction {
 			pstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
+			buy_it_now_price = BigDecimal.ZERO;
+			bid_price = BigDecimal.ZERO;
 			return false;
 		}
 		if (!right_choice) {
