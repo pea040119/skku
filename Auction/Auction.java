@@ -903,7 +903,7 @@ public class Auction {
 		buy_it_now_price = BigDecimal.ZERO;
 		bid_price = BigDecimal.ZERO;
 		boolean right_choice = false;
-		String find_query = "SELECT i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price FROM Items as i JOIN Bids as b ON i.item_id=b.item_id WHERE item_id = ?";
+		String find_query = "SELECT i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price FROM Items as i LEFT JOIN Bids as b ON i.item_id=b.item_id WHERE item_id = ?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(find_query);
 			try {
@@ -926,6 +926,25 @@ public class Auction {
 		if (!right_choice) {
 			System.out.println("Invalid choice is entered. Try again.");
 			return false;
+		}
+
+		if (bid_price == null) {
+			String insert_query = "INSERT INTO Billing (item_id, sold_date, seller_id, buyer_id, price) " +
+								"SELECT b.item_id, NOW(), i.seller_id, b.bidder_id, b.bid_price " +
+								"FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
+			
+			try {
+				PreparedStatement pstmt = connection.prepareStatement(insert_query);
+				pstmt.setInt(1, item_id);
+				int rowsAffected = pstmt.executeUpdate();
+				if (rowsAffected == 0){;}
+				pstmt.close();
+			} catch (SQLException e) {
+				System.out.println("Error: Invalid input is entered. Please select again.");
+				return false;
+			}
+
+			System.out.println("Congratulations, the item is yours now.\n");
 		}
 
 		comparisonResult = bid_price.compareTo(BigDecimal.valueOf(price));
@@ -961,8 +980,8 @@ public class Auction {
 			System.out.println("Congratulations, the item is yours now.\n");
 		} else {
 			String delete_query = "DELET FROM Bids WHERE item_id=?";
-			String insert_query = "INSERT INTO OldBids (item_id, bid_price, bidder_id, date_posted, bid_closing_date) " +
-								"SELECT b.item_id, b.bid_price, b.bidder_id, b.date_posted, i.bid_closing_date " +
+			String insert_query = "INSERT INTO OldBids (item_id, bid_price, bidder_id, date_posted) " +
+								"SELECT b.item_id, b.bid_price, b.bidder_id, b.date_posted " +
 								"FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
 			
 			try {
