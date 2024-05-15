@@ -72,7 +72,7 @@ class UpdateDB implements Runnable {
 					pstmt.setInt(1, item_id);
 					rowsAffected = pstmt.executeUpdate();
 					if (rowsAffected == 0){;}
-					pstmt.close();
+					pstmt.close();
 				} catch (java.util.InputMismatchException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
 					continue ;
@@ -112,7 +112,7 @@ public class Auction {
 	private static Scanner scanner = new Scanner(System.in);
 	private static String username;
 	private static Connection connection;
-	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 	public enum Category {
 		ELECTRONICS(1),
@@ -546,9 +546,9 @@ public class Auction {
 							seller_id = rs.getString("seller_id");
 							buyer_id = rs.getString("buyer_id");
 							price = rs.getBigDecimal("price");
-							commissions = price.divede(new BigDecimal("10"));
+							commissions = price.divide(new BigDecimal("10"));
 							sold_date = rs.getTimestamp("sold_date");
-							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+seller_id+"\t"+buyer_id+"\t"+price.toString()+"\t"+commissions.toString());
+							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+seller_id+"\t"+buyer_id+"\t"+String.valueOf(price)+"\t"+String.valueOf(commissions));
 						} 
 						rs.close();
 					} catch (java.util.InputMismatchException e) {
@@ -588,7 +588,7 @@ public class Auction {
 							price = rs.getBigDecimal("price");
 							commissions = price.divide(new BigDecimal("10"));
 							sold_date = rs.getTimestamp("sold_date");
-							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+buyer_id+"\t"+price.toString()+"\t"+commissions.toString());
+							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+buyer_id+"\t"+String.valueOf(price)+"\t"+String.valueOf(commissions));
 						}
 						rs.close();
 					} catch (java.util.InputMismatchException e) {
@@ -621,7 +621,7 @@ public class Auction {
 							total_price = rs.getBigDecimal("total_price");
 							total_price = total_price.multiply(BigDecimal.valueOf(0.9));
 							num_item = rs.getInt("num_item");
-							System.out.println(seller_id+"\t"+num_item.toString()+"\t"+total_price.toString());
+							System.out.println(seller_id+"\t"+num_item.toString()+"\t"+String.valueOf(total_price));
 						}
 						rs.close();
 					} catch (java.util.InputMismatchException e) {
@@ -653,7 +653,7 @@ public class Auction {
 							buyer_id = rs.getString("buyer_id");
 							total_price = rs.getBigDecimal("total_price");
 							num_item = rs.getInt("num_item");
-							System.out.println(buyer_id+"\t"+num_item.toString()+"\t"+total_price.toString());
+							System.out.println(buyer_id+"\t"+num_item.toString()+"\t"+String.valueOf(total_price));
 						}
 						rs.close();
 					} catch (java.util.InputMismatchException e) {
@@ -696,7 +696,7 @@ public class Auction {
 					bidder_id = rs.getString("bidder_id");
 					bid_price = rs.getBigDecimal("bid_price");
 					bid_date = rs.getTimestamp("bid_date");
-					System.out.println(item_id.toString()+"\t"+bidder_id+"\t"+bid_price.toString()+"\t"+bid_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+bidder_id+"\t"+String.valueOf(bid_price)+"\t"+bid_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
@@ -865,7 +865,7 @@ public class Auction {
 					bid_price = rs.getBigDecimal("bid_price");
 					time_left = rs.getTimestamp("time_left");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+bid_price.toString()+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+String.valueOf(bid_price)+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
@@ -1003,7 +1003,7 @@ public class Auction {
 					description = rs.getString("description");
 					bid_price = rs.getBigDecimal("bid_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+username+"\t"+bid_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+description+"\t"+username+"\t"+String.valueOf(bid_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
@@ -1034,7 +1034,7 @@ public class Auction {
 					bid_price = rs.getBigDecimal("bid_price");
 					highest_price = rs.getBigDecimal("highest_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+highest_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
@@ -1065,7 +1065,7 @@ public class Auction {
 					bid_price = rs.getBigDecimal("bid_price");
 					highest_price = rs.getBigDecimal("highest_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+highest_price.toString()+"\t"+bid_price.toString()+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
@@ -1104,7 +1104,7 @@ public class Auction {
 					price = rs.getBigDecimal("price");
 					commissions = price.divede(new BigDecimal("10"));
 					sold_date = rs.getTimestamp("sold_date");
-					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+price.toString()+"\t"+buyer_id+"\t"+commissions.toString());
+					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+String.valueOf(price)+"\t"+buyer_id+"\t"+String.valueOf(commissions));
 				}
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
@@ -1138,7 +1138,7 @@ public class Auction {
 					seller_id = rs.getString("seller_id");
 					price = rs.getBigDecimal("price");
 					sold_date = rs.getTimestamp("sold_date");
-					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+price.toString()+"\t"+seller_id+"\t");
+					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+String.valueOf(price)+"\t"+seller_id+"\t");
 				}
 				rs.close();
 			} catch (java.util.InputMismatchException e) {
