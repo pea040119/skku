@@ -4,6 +4,7 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
 import java.sql.Timestamp;
+import java.sql. *;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.text. *;
@@ -50,12 +51,12 @@ class UpdateDB implements Runnable {
 					rs.close();
 				} catch (java.util.InputMismatchException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
-					return false;
+					continue;
 				}
 				pstmt.close();
 			} catch (java.util.InputMismatchException e) {
 				System.out.println("Error: Invalid input is entered. Please select again.");
-				return false;
+				continue ;
 			}
 
 			while(!item_ids.isEmpty()) {
@@ -74,7 +75,7 @@ class UpdateDB implements Runnable {
 					pstmt.close();
 				} catch (java.util.InputMismatchException e) {
 					System.out.println("Error: Invalid input is entered. Please select again.");
-					return false;
+					continue ;
 				}
 			}
 
@@ -186,7 +187,7 @@ public class Auction {
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query_login);
 			pstmt.setString(1, username);
-			pstmt.setString(2, pwd);
+			pstmt.setString(2, userpass);
 			try {
 				ResultSet rs = pstmt.executeQuery();
 				if (rs.next()) {
@@ -313,9 +314,13 @@ public class Auction {
 			}
 		}while(!flag_cond);
 
+		String description;
+		BigDecimal set_price;
+		LocalDateTime dateTime;
+
 		try {
 			System.out.println("---- Description of the item (one line): ");
-			String description = scanner.nextLine();
+			description = scanner.nextLine();
 			System.out.println("---- Buy-It-Now price: ");
 
 			while (!scanner.hasNextInt()) {
@@ -325,12 +330,12 @@ public class Auction {
 
 			price = scanner.nextInt();
 			scanner.nextLine();
-			BigDecimal set_price = new BigDecimal(price);
+			set_price = new BigDecimal(price);
 
 			System.out.print("---- Bid closing date and time (YYYY-MM-DD HH:MM): ");
 			// you may assume users always enter valid date/time
 			String date = scanner.nextLine();  /* "2023-03-04 11:30"; */
-			LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+			dateTime = LocalDateTime.parse(date, formatter);
 		}catch (Exception e) {
 			System.out.println("Error: Invalid input is entered. Going back to the previous menu.");
 			return false;
@@ -418,7 +423,7 @@ public class Auction {
 			pstmt.setString(1, new_username);
 			pstmt.setString(2, userpass);
 			if (is_unique_name) {
-				if (is_admin.equals("Y")) {
+				if (isAdmin.equals("Y")) {
 					pstmt.setBoolean(3, true);
 				}
 				else {
@@ -478,7 +483,7 @@ public class Auction {
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query_login);
 			pstmt.setString(1, username);
-			pstmt.setString(2, pwd);
+			pstmt.setString(2, userpass);
 			try {
 				ResultSet rs = pstmt.executeQuery();
 				if (rs.next()) {
