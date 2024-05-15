@@ -548,7 +548,7 @@ public class Auction {
 							price = rs.getBigDecimal("price");
 							commissions = price.divide(new BigDecimal("10"));
 							sold_date = rs.getTimestamp("sold_date");
-							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+seller_id+"\t"+buyer_id+"\t"+String.valueOf(price)+"\t"+String.valueOf(commissions));
+							System.out.println(String.valueOf(item_id)+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+seller_id+"\t"+buyer_id+"\t"+String.valueOf(price)+"\t"+String.valueOf(commissions));
 						} 
 						rs.close();
 					} catch (SQLException e) {
@@ -588,7 +588,7 @@ public class Auction {
 							price = rs.getBigDecimal("price");
 							commissions = price.divide(new BigDecimal("10"));
 							sold_date = rs.getTimestamp("sold_date");
-							System.out.println(item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+buyer_id+"\t"+String.valueOf(price)+"\t"+String.valueOf(commissions));
+							System.out.println(String.valueOf(item_id)+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+buyer_id+"\t"+String.valueOf(price)+"\t"+String.valueOf(commissions));
 						}
 						rs.close();
 					} catch (SQLException e) {
@@ -696,7 +696,7 @@ public class Auction {
 					bidder_id = rs.getString("bidder_id");
 					bid_price = rs.getBigDecimal("bid_price");
 					bid_date = rs.getTimestamp("bid_date");
-					System.out.println(item_id.toString()+"\t"+bidder_id+"\t"+String.valueOf(bid_price)+"\t"+bid_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+bidder_id+"\t"+String.valueOf(bid_price)+"\t"+bid_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -865,7 +865,7 @@ public class Auction {
 					bid_price = rs.getBigDecimal("bid_price");
 					time_left = rs.getTimestamp("time_left");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+String.valueOf(bid_price)+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+condition+"\t"+seller_id+"\t"+buy_it_now_price.toString()+"\t"+String.valueOf(bid_price)+"\t"+bidder_id+"\t"+time_left.toLocalDateTime().format(formatter)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -1003,7 +1003,7 @@ public class Auction {
 					description = rs.getString("description");
 					bid_price = rs.getBigDecimal("bid_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+username+"\t"+String.valueOf(bid_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+username+"\t"+String.valueOf(bid_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -1034,7 +1034,7 @@ public class Auction {
 					bid_price = rs.getBigDecimal("bid_price");
 					highest_price = rs.getBigDecimal("highest_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -1065,7 +1065,7 @@ public class Auction {
 					bid_price = rs.getBigDecimal("bid_price");
 					highest_price = rs.getBigDecimal("highest_price");
 					bid_closing_date = rs.getTimestamp("bid_closing_date");
-					System.out.println(item_id.toString()+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
+					System.out.println(String.valueOf(item_id)+"\t"+description+"\t"+highest_bidder+"\t"+String.valueOf(highest_price)+"\t"+String.valueOf(bid_price)+"\t"+bid_closing_date.toLocalDateTime().format(formatter));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -1102,9 +1102,9 @@ public class Auction {
 					category = Category.getCategory(rs.getInt("category"));
 					buyer_id = rs.getString("buyer_id");
 					price = rs.getBigDecimal("price");
-					commissions = price.divede(new BigDecimal("10"));
+					commissions = price.divide(new BigDecimal("10"));
 					sold_date = rs.getTimestamp("sold_date");
-					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+String.valueOf(price)+"\t"+buyer_id+"\t"+String.valueOf(commissions));
+					System.out.println(category+"\t"+String.valueOf(item_id)+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+String.valueOf(price)+"\t"+buyer_id+"\t"+String.valueOf(commissions));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -1120,7 +1120,7 @@ public class Auction {
 		System.out.println("[Purchased Items] \n");
 		System.out.println("item category  | item ID   | purchased date | puchased price  | seller ID ");
 		System.out.println("--------------------------------------------------------------------------");
-		String query = "SELECT i.category, b.item_id, b.sold_date, b.price, b.seller_id FROM Billing as b JOIN Items as i ON b.item_id = i.item_id WHERE b.buyer_id=?";
+		query = "SELECT i.category, b.item_id, b.sold_date, b.price, b.seller_id FROM Billing as b JOIN Items as i ON b.item_id = i.item_id WHERE b.buyer_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
@@ -1138,7 +1138,7 @@ public class Auction {
 					seller_id = rs.getString("seller_id");
 					price = rs.getBigDecimal("price");
 					sold_date = rs.getTimestamp("sold_date");
-					System.out.println(category+"\t"+item_id.toString()+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+String.valueOf(price)+"\t"+seller_id+"\t");
+					System.out.println(category+"\t"+String.valueOf(item_id)+"\t"+sold_date.toLocalDateTime().format(formatter)+"\t"+String.valueOf(price)+"\t"+seller_id+"\t");
 				}
 				rs.close();
 			} catch (SQLException e) {
