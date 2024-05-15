@@ -37,7 +37,7 @@ CREATE TABLE OldBids (
     bid_price NUMERIC(10, 2)  ,
     bidder_id VARCHAR(20)  ,
     date_posted TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (item_id, bid_closing_date) REFERENCES Items(item_id),
+    FOREIGN KEY (item_id) REFERENCES Items(item_id),
     FOREIGN KEY (bidder_id) REFERENCES Users(user_id)
 );
 

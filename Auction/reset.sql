@@ -1,4 +1,5 @@
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO public;
+DROP TABLE Users;
+DROP TABLE Items;
+DROP TABLE Bids;
+DROP TABLE OldBids;
+DROP TABLE Billing;
