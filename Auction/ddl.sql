@@ -27,7 +27,7 @@ CREATE TABLE Bids (
     bidder_id VARCHAR(20) NOT NULL,
     date_posted TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     bid_closing_date TIMESTAMPTZ,
-    FOREIGN KEY (item_id, bid_closing_date) REFERENCES Items(item_id, bid_closing_date),
+    FOREIGN KEY (item_id, bid_closing_date) REFERENCES Items(item_id),
     FOREIGN KEY (bidder_id) REFERENCES Users(user_id)
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE OldBids (
     bidder_id VARCHAR(20) NOT NULL,
     date_posted TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     bid_closing_date TIMESTAMPTZ,
-    FOREIGN KEY (item_id, bid_closing_date) REFERENCES Items(item_id, bid_closing_date),
+    FOREIGN KEY (item_id, bid_closing_date) REFERENCES Items(item_id),
     FOREIGN KEY (bidder_id) REFERENCES Users(user_id)
 );
 

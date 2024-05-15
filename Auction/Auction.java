@@ -962,7 +962,7 @@ public class Auction {
 		} else {
 			String delete_query = "DELET FROM Bids WHERE item_id=?";
 			String insert_query = "INSERT INTO OldBids (item_id, bid_price, bidder_id, date_posted, bid_closing_date) " +
-								"SELECT b.item_id, b.bid_price, b.bidder_id, b.date_posted, b.bid_closing_date " +
+								"SELECT b.item_id, b.bid_price, b.bidder_id, b.date_posted, i.bid_closing_date " +
 								"FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE item_id = ?";
 			
 			try {
@@ -995,7 +995,7 @@ public class Auction {
 		System.out.println("item ID   | item description   | highest bidder | highest bidding price | your bidding price | bid closing date/time");
 		System.out.println("--------------------------------------------------------------------------------------------------------------------");
 		
-		String query = "SELECT b.item_id, i.decription, b.bid_price b.bid_closing_date FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE b.bidder_id=?";
+		String query = "SELECT b.item_id, i.decription, b.bid_price i.bid_closing_date FROM Bids as b JOIN Items as i ON b.item_id = i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
@@ -1024,7 +1024,7 @@ public class Auction {
 			return ;
 		}
 
-		query = "SELECT o.item_id as item_id,  i.description as dscription, b.bidder_id as highest_bidder, b.bid_price as highest_price, o.bid_price as bid_price b.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Bids as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
+		query = "SELECT o.item_id as item_id,  i.description as dscription, b.bidder_id as highest_bidder, b.bid_price as highest_price, o.bid_price as bid_price i.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Bids as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
