@@ -80,7 +80,11 @@ class UpdateDB implements Runnable {
 			}
 		}
 
-		connection.close();
+		try {
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		global_data.setAuctionOver(true);
 	}
 }
@@ -483,8 +487,8 @@ public class Auction {
 
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query_login);
-			pstmt.setString(1, username);
-			pstmt.setString(2, userpass);
+			pstmt.setString(1, adminname);
+			pstmt.setString(2, adminpass);
 			try {
 				ResultSet rs = pstmt.executeQuery();
 				if (rs.next()) {
@@ -622,7 +626,7 @@ public class Auction {
 							total_price = rs.getBigDecimal("total_price");
 							total_price = total_price.multiply(BigDecimal.valueOf(0.9));
 							num_item = rs.getInt("num_item");
-							System.out.println(seller_id+"\t"+num_item.toString()+"\t"+String.valueOf(total_price));
+							System.out.println(seller_id+"\t"+String.valueOf(num_item)+"\t"+String.valueOf(total_price));
 						}
 						rs.close();
 					} catch (SQLException e) {
@@ -654,7 +658,7 @@ public class Auction {
 							buyer_id = rs.getString("buyer_id");
 							total_price = rs.getBigDecimal("total_price");
 							num_item = rs.getInt("num_item");
-							System.out.println(buyer_id+"\t"+num_item.toString()+"\t"+String.valueOf(total_price));
+							System.out.println(buyer_id+"\t"+String.valueOf(num_item)+"\t"+String.valueOf(total_price));
 						}
 						rs.close();
 					} catch (SQLException e) {
@@ -1018,7 +1022,7 @@ public class Auction {
 			return ;
 		}
 
-		String query = "SELECT o.item_id as item_id,  i.description as dscription, b.bidder_id as highest_bidder, b.bid_price as highest_price, o.bid_price as bid_price b.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Bids as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
+		query = "SELECT o.item_id as item_id,  i.description as dscription, b.bidder_id as highest_bidder, b.bid_price as highest_price, o.bid_price as bid_price b.bid_closing_date as bid_closing_date FROM OldBids as o LEFT JOIN Bids as b ON o.item_id=b.item_id LEFT JOIN Items as i ON o.item_id=i.item_id WHERE b.bidder_id=?";
 		try {
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, username);
