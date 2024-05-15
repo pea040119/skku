@@ -1279,7 +1279,11 @@ public class Auction {
 				}
 			} catch (SQLException e) {
 				System.out.println("SQLException : " + e);	
-				connection.close();
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 				global_data.setAuctionOver(true);
 				while(!global_data.getUpdateOver()) {;}
 				System.exit(1);
