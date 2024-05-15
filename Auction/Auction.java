@@ -717,8 +717,8 @@ public class Auction {
 	}
 
 	public static boolean BuyItem(){
-		Category category;
-		Condition condition;
+		Category category = Category.ELECTRONICS;
+		Condition condition = Condition.NEW;
 		char choice;
 		int price;
 		String keyword, seller, datePosted;
@@ -900,6 +900,8 @@ public class Auction {
 
 		int comparisonResult, item_id = Integer.parseInt(item_id_str);
 		BigDecimal buy_it_now_price, bid_price;
+		buy_it_now_price = BigDecimal.ZERO;
+		bid_price = BigDecimal.ZERO;
 		boolean right_choice = false;
 		String find_query = "SELECT i.buy_it_now_price as buy_it_now_price, b.bid_price as bid_price FROM Items as i JOIN Bids as b ON i.item_id=b.item_id WHERE item_id = ?";
 		try {
@@ -919,8 +921,6 @@ public class Auction {
 			pstmt.close();
 		} catch (SQLException e) {
 			System.out.println("Error: Invalid input is entered. Please select again.");
-			buy_it_now_price = BigDecimal.ZERO;
-			bid_price = BigDecimal.ZERO;
 			return false;
 		}
 		if (!right_choice) {
