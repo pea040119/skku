@@ -2,6 +2,7 @@ package simpledb.buffer;
 
 import simpledb.file.*;
 import simpledb.log.LogMgr;
+import java.util.* ;
 
 /**
  * Manages the pinning and unpinning of buffers to blocks.
@@ -10,6 +11,7 @@ import simpledb.log.LogMgr;
  */
 public class BufferMgr {
    private Buffer[] bufferpool; /* buffer pool */ 
+   private LinkedList<Buffer> unpinnedBuffers; 
    private int numAvailable;   /* the number of available (unpinned) buffer slots */
    private static final long MAX_TIME = 10000; /* 10 seconds */
    
@@ -22,9 +24,14 @@ public class BufferMgr {
     */
    public BufferMgr(FileMgr fm, LogMgr lm, int numbuffs) {
       bufferpool = new Buffer[numbuffs];
+      unpinnedBuffers = new LinkedList<Buffer>();
       numAvailable = numbuffs;
-      for (int i=0; i<numbuffs; i++)
-         bufferpool[i] = new Buffer(fm, lm);
+      System.out.print(numAvailable);
+      for (int i=0; i<numbuffs; i++) {
+         Buffer buff = new Buffer(fm, lm);
+         bufferpool[i] = buff;
+         unpinnedBuffers.add(buff);
+      }
    }
    
    /**
@@ -54,6 +61,7 @@ public class BufferMgr {
       buff.unpin();
       if (!buff.isPinned()) {
          numAvailable++;
+         unpinnedBuffers.add(buff);
          notifyAll();
       }
    }
@@ -134,9 +142,26 @@ public class BufferMgr {
     * @return the unpinned buffer       
     */
    private Buffer chooseUnpinnedBuffer() {
-      for (Buffer buff : bufferpool)
-         if (!buff.isPinned())
-         return buff;
+      if (unpinnedBuffers.isEmpty()) {
       return null;
+      }
+      return unpinnedBuffers.removeFirst();
    }
+
+
+   public synchronized void printStatus() {
+        System.out.println("Allocated Buffers:");
+        for (int i=0; i<bufferpool.length; i++) {
+            Buffer buff = bufferpool[i];
+            String status = buff.isPinned() ? "pinned" : "unpinned";
+            System.out.println("Buffer " + buff.block().number() + ": " + buff.block() + " " + status);
+        }
+        System.out.print("Unpinned Buffers in LRU order: ");
+        Iterator<Buffer> iterator = unpinnedBuffers.iterator();
+        while (iterator.hasNext()) {
+            Buffer buff = iterator.next();
+            System.out.print(buff.block().number() + " ");
+        }
+        System.out.println();
+    }
 }
