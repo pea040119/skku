@@ -17,8 +17,8 @@ import simpledb.file.BlockId;
 class LockTable {
    private static final long MAX_TIME = 10000; // 10 seconds
    
-   private Map<BlockId,Integer> locks = new HashMap<BlockId,Integer>();
-   
+   private Map<BlockId,List<Integer>> locks = new HashMap<BlockId,List<Integer>>();
+   private Map<Integer, Long> txnTimestamps = new HashMap<>();
    /**
     * Grant an SLock on the specified block.
     * If an XLock exists when the method is called,
@@ -29,17 +29,23 @@ class LockTable {
     * then an exception is thrown.
     * @param blk a reference to the disk block
     */
-   public synchronized void sLock(BlockId blk) {
+   public synchronized void sLock(BlockId blk) throws LockAbortException {
       try {
          long timestamp = System.currentTimeMillis();
          while (hasXlock(blk) && !waitingTooLong(timestamp))
             wait(MAX_TIME);
          if (hasXlock(blk))
             throw new LockAbortException();
-         int val = getLockVal(blk);  // will not be negative
-         locks.put(blk, val+1);
-      }
-      catch(InterruptedException e) {
+         List<Integer> holders = locks.getOrDefault(blk, new ArrayList<>());
+         if (!holders.isEmpty()) {
+            int oldestTxn = holders.stream().min(Comparator.comparingLong(txnTimestamps::get)).orElseThrow();
+            if (txnTimestamps.get(Transaction.current().getId()) < txnTimestamps.get(oldestTxn))
+               throw new LockAbortException();
+         }
+         holders.add(Transaction.current().getId());
+         locks.put(blk, holders);
+         txnTimestamps.put(Transaction.current().getId(), timestamp);
+      } catch(InterruptedException e) {
          throw new LockAbortException();
       }
    }
@@ -54,16 +60,23 @@ class LockTable {
     * then an exception is thrown.
     * @param blk a reference to the disk block
     */
-   synchronized void xLock(BlockId blk) {
+   synchronized void xLock(BlockId blk) throws LockAbortException {
       try {
          long timestamp = System.currentTimeMillis();
          while (hasOtherSLocks(blk) && !waitingTooLong(timestamp))
             wait(MAX_TIME);
          if (hasOtherSLocks(blk))
             throw new LockAbortException();
-         locks.put(blk, -1);
-      }
-      catch(InterruptedException e) {
+         List<Integer> holders = locks.getOrDefault(blk, new ArrayList<>());
+         if (!holders.isEmpty()) {
+            int oldestTxn = holders.stream().min(Comparator.comparingLong(txnTimestamps::get)).orElseThrow();
+            if (txnTimestamps.get(Transaction.current().getId()) < txnTimestamps.get(oldestTxn))
+               throw new LockAbortException();
+         }
+         holders.add(-Transaction.current().getId()); // Use negative transaction ID to denote exclusive lock
+         locks.put(blk, holders);
+         txnTimestamps.put(Transaction.current().getId(), timestamp);
+      } catch(InterruptedException e) {
          throw new LockAbortException();
       }
    }
@@ -75,21 +88,22 @@ class LockTable {
     * @param blk a reference to the disk block
     */
    synchronized void unlock(BlockId blk) {
-      int val = getLockVal(blk);
-      if (val > 1)
-         locks.put(blk, val-1);
-      else {
+      List<Integer> holders = locks.getOrDefault(blk, new ArrayList<>());
+      holders.remove(Integer.valueOf(Transaction.current().getId()));
+      if (holders.isEmpty()) {
          locks.remove(blk);
          notifyAll();
       }
    }
    
    private boolean hasXlock(BlockId blk) {
-      return getLockVal(blk) < 0;
+      List<Integer> holders = locks.getOrDefault(blk, new ArrayList<>());
+      return holders.stream().anyMatch(id -> id < 0);
    }
    
    private boolean hasOtherSLocks(BlockId blk) {
-      return getLockVal(blk) > 1;
+      List<Integer> holders = locks.getOrDefault(blk, new ArrayList<>());
+      return holders.size() > 1 || (holders.size() == 1 && holders.get(0) < 0);
    }
    
    private boolean waitingTooLong(long starttime) {
