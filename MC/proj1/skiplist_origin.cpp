@@ -6,19 +6,16 @@
  * Compile with -O2
  */
 
-#include <limits.h>-O2
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
-#include <pthread.h>
 
-#include "skiplist.h"
+#include "skiplist_origin.h"
 
 using namespace std;
-
-
 
 int main(int argc, char* argv[])
 {
@@ -28,15 +25,13 @@ int main(int argc, char* argv[])
     skiplist<int, int> list(0,INT_MAX);
 
     // check and parse command line options
-    if (argc != 3) {
-        printf("Usage: %s <infile> <number_of_threads>\n", argv[0]);
+    if (argc != 2) {
+        printf("Usage: %s <infile>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
     char *fn = argv[1];
-    int num_thread = atoi(argv[2]);
 
     clock_gettime( CLOCK_REALTIME, &start);
-    pthread_t threads[num_thread];
 
     // load input file
     FILE* fin = fopen(fn, "r");
@@ -57,7 +52,7 @@ int main(int argc, char* argv[])
             printf("ERROR: Unrecognized action: '%c'\n", action);
             exit(EXIT_FAILURE);
         }
-	    count++;
+	count++;
     }
     fclose(fin);
     clock_gettime( CLOCK_REALTIME, &stop);

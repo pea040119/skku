@@ -1,75 +1,49 @@
 #include <iostream>
 #include <sstream>
-#include <pthread.h>
 
 #define BILLION  1000000000L
 
 using namespace std;
  
-
-
-//SkipList Node
 template<class K,class V,int MAXLEVEL>
-class skiplist_node {
+class skiplist_node
+{
 public:
-    skiplist_node() {
-        for ( int i=1; i<=MAXLEVEL; i++ ) {
-           forwards[i] = NULL;
-        }
-        pthread_rwlock_init(&lock, NULL);
-    }
- 
-
-    skiplist_node(K searchKey):key(searchKey) {
+    skiplist_node()
+    {
         for ( int i=1; i<=MAXLEVEL; i++ ) {
             forwards[i] = NULL;
         }
-        pthread_rwlock_init(&lock, NULL);
     }
  
-
-    skiplist_node(K searchKey,V val):key(searchKey),value(val) {
+    skiplist_node(K searchKey):key(searchKey)
+    {
         for ( int i=1; i<=MAXLEVEL; i++ ) {
             forwards[i] = NULL;
         }
-        pthread_rwlock_init(&lock, NULL);
     }
  
-    virtual ~skiplist_node() {
-        pthread_rwlock_destroy(&lock);
+    skiplist_node(K searchKey,V val):key(searchKey),value(val)
+    {
+        for ( int i=1; i<=MAXLEVEL; i++ ) {
+            forwards[i] = NULL;
+        }
     }
-
-
-    void read_lock() {
-        pthread_rwlock_rdlock(&lock);
+ 
+    virtual ~skiplist_node()
+    {
     }
-    
-
-    void write_lock() {
-        pthread_rwlock_wrlock(&lock);
-    }
-
-    
-    void unlock() {
-        pthread_rwlock_unlock(&lock);
-    }
-
-
+ 
     K key;
     V value;
     skiplist_node<K,V,MAXLEVEL>* forwards[MAXLEVEL+1];
-
-
-private:
-    pthread_rwlock_t lock;
 };
  
-
-
-//SkipList
+///////////////////////////////////////////////////////////////////////////////
+ 
 template<class K, class V, int MAXLEVEL = 16>
 class skiplist
-{///////////////////////////////////////////////////////////////////////////////
+{
 public:
     typedef K KeyType;
     typedef V ValueType;
@@ -101,36 +75,17 @@ public:
     void insert(K searchKey,V newValue)
     {
         skiplist_node<K,V,MAXLEVEL>* update[MAXLEVEL];
-        NodeType *currNode = m_pHeader, *temp;
-        bool check = false;
-        
+        NodeType* currNode = m_pHeader;
         for(int level=max_curr_level; level >=1; level--) {
-            while (true) {
-                currNode->read_lock();
-                if (currNode->forwards[level]->key >= searchKey) {
-                    currNode->unlock();
-                    break;
-                }
-                temp = currNode->forwards[level];
-                currNode->unlock();
-                currNode = temp;
+            while ( currNode->forwards[level]->key < searchKey ) {
+                currNode = currNode->forwards[level];
             }
             update[level] = currNode;
         }
-        currNode->read_lock();
-        temp = currNode->forwards[1];
-        currNode->unlock();
-        currNode = temp;
+        currNode = currNode->forwards[1];
 
-        currNode->read_lock();
-        check = currNode->key == searchKey;
-        currNode->unlock();
-
-        
-        if (check) {
-            currNode->write_lock();
+        if ( currNode->key == searchKey ) {
             currNode->value = newValue;
-            currNode->unlock();
         }
         else {
             int newlevel = randomLevel();
@@ -141,14 +96,10 @@ public:
                 max_curr_level = newlevel;
             }
             currNode = new NodeType(searchKey,newValue);
-            currNode->write_lock();
             for ( int lv=1; lv<=max_curr_level; lv++ ) {
-                update[lv]->write_lock();
                 currNode->forwards[lv] = update[lv]->forwards[lv];
                 update[lv]->forwards[lv] = currNode;
-                update[lv]->unlock();
             }
-            currNode->unlock();
         }
     }
  
@@ -179,31 +130,16 @@ public:
     }
  
     //const NodeType* find(K searchKey)
-    V find(K searchKey) {
-        NodeType *currNode = m_pHeader, *temp;
-        bool check;
-
+    V find(K searchKey)
+    {
+        NodeType* currNode = m_pHeader;
         for(int level=max_curr_level; level >=1; level--) {
-            while (true) {
-                currNode->read_lock();
-                if (currNode->forwards[level]->key >= searchKey) {
-                    currNode->unlock();
-                    break;
-                }
-                temp = currNode->forwards[level];
-                currNode->unlock();
-                currNode = temp;
+            while ( currNode->forwards[level]->key < searchKey ) {
+                currNode = currNode->forwards[level];
             }
         }
-
-        currNode->read_lock();
-        temp = currNode->forwards[1];
-        currNode->unlock();
-        currNode = temp;
-        currNode->read_lock();
-        check = currNode->key == searchKey;
-        currNode->unlock();
-        if (check) {
+        currNode = currNode->forwards[1];
+        if ( currNode->key == searchKey ) {
             return currNode->value;
         }
         else {
