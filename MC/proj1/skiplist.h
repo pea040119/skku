@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <pthread.h>
+#include <queue>
 
 #define BILLION  1000000000L
 
@@ -71,21 +72,24 @@ template<class K, class V, int MAXLEVEL = 16>
 class skiplist
 {///////////////////////////////////////////////////////////////////////////////
 public:
+    const int max_level;
     typedef K KeyType;
     typedef V ValueType;
     typedef skiplist_node<K,V,MAXLEVEL> NodeType;
  
+
     skiplist(K minKey,K maxKey):m_pHeader(NULL),m_pTail(NULL),
                                 max_curr_level(1),max_level(MAXLEVEL),
                                 m_minKey(minKey),m_maxKey(maxKey)
     {
         m_pHeader = new NodeType(m_minKey);
         m_pTail = new NodeType(m_maxKey);
-        for ( int i=1; i<=MAXLEVEL; i++ ) {
+        for ( int i=1; i<=MAconst int max_level;XLEVEL; i++ ) {
             m_pHeader->forwards[i] = m_pTail;
         }
     }
  
+
     virtual ~skiplist()
     {
         NodeType* currNode = m_pHeader->forwards[1];
@@ -97,8 +101,37 @@ public:
         delete m_pHeader;
         delete m_pTail;
     }
- 
-    void insert(K searchKey,V newValue)
+
+
+    void insert(K searchKey, V newValue) {
+
+    }
+
+
+    V find(K searchKey) {
+
+    }
+
+
+    bool empty() const
+    {
+        return ( m_pHeader->forwards[1] == m_pTail );
+    }
+
+
+private:
+    queue<int, int> buffer;
+    pthread_mutex_t buffer_lock;
+    pthread_cond_t producer_cond;
+    pthread_cond_t consumer_cond;
+
+
+    void _skiplist() {
+
+    }
+
+
+    void _insert(K searchKey,V newValue)
     {
         skiplist_node<K,V,MAXLEVEL>* update[MAXLEVEL];
         NodeType *currNode = m_pHeader, *temp;
@@ -179,7 +212,7 @@ public:
     }
  
     //const NodeType* find(K searchKey)
-    V find(K searchKey) {
+    V _find(K searchKey) {
         NodeType *currNode = m_pHeader, *temp;
         bool check;
 
@@ -212,12 +245,8 @@ public:
         }
     }
  
-    bool empty() const
-    {
-        return ( m_pHeader->forwards[1] == m_pTail );
-    }
  
-    std::string printList()
+    std::string _printList()
     {
 	int i=0;
         std::stringstream sstr;
@@ -231,8 +260,8 @@ public:
         }
         return sstr.str();
     }
- 
-    const int max_level;
+
+
  
 protected:
     double uniformRandom()
