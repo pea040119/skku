@@ -6,7 +6,7 @@
  * Compile with -O2
  */
 
-#include <limits.h>-O2
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

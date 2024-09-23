@@ -8,8 +8,151 @@
 using namespace std;
  
 
+// Linked List Node
+class linked_list_node {
+public:
+    linked_list_node* next;
+    int action;
+    int type;
+    int id;
+    int value;
 
-//SkipList Node
+
+    linked_list_node() {
+        next = NULL;
+        type = 0;
+        action = 0;
+        value = 0;
+        id = -1;
+    }
+
+
+    virtual ~linked_list_node() {
+        pthread_rwlock_destroy(&lock);
+    }
+
+
+    void read_lock() {
+        pthread_rwlock_rdlock(&lock);
+    }
+    
+
+    void write_lock() {
+        pthread_rwlock_wrlock(&lock);
+    }
+
+    
+    void unlock() {
+        pthread_rwlock_unlock(&lock);
+    }
+
+
+private:
+    pthread_rwlock_t lock;
+};
+
+
+// Circular Linked List
+class circular_linked_list {
+private:
+    typedef linked_list_node NodeType;
+
+
+    circular_linked_list(int size) {
+        _size = size;
+
+        head = new NodeType();
+        NodeType *currNode = head, *tail, *temp;
+        for(int i=0; i<size; i++) {
+            currNode->write_lock();
+            currNode->next = new NodeType();
+            temp = currNode->next;
+            currNode->unlock();
+            currNode = temp;
+        }
+        currNode->write_lock();
+        currNode->next = head;
+        currNode->unlock();
+        head->read_lock();
+        tail = head->next;
+        head->unlock();
+    }
+
+
+    bool insert(int id, int type, int action, int value) {
+        NodeType *temp;
+        tail->write_lock();
+
+        if (tail->next == head) {
+            tail->unlock();
+            return false;
+        }
+
+        tail->id = id;
+        tail->type = type;
+        tail->action = action;
+        tail->value = value;
+        temp = tail->next;
+
+        tail->unlock();
+        tail = temp;
+
+        return true;   
+    }
+
+
+    bool pop(int *id, int *type, int *action, int *value) {
+        NodeType *temp;
+        head->write_lock();
+        
+        if (head->next == tail) {
+            head->unlock();
+            return false;
+        }
+
+        *id = tail->id;
+        tail->id = -1;
+        *type = tail->type;
+        *action = tail->action;
+        *value = tail->value;
+
+    }
+
+
+    int size() {
+        return _size;
+    }
+
+
+    bool is_empty() {
+        bool check;
+        head->read_lock();
+        check = head->next == tail;
+        head->unlock();
+        return check;
+    }
+
+
+    bool is_full() {
+        bool check;
+        tail->read_lock();
+        check = tail->next == head;
+        tail->unlock();
+        return check;
+    }
+
+
+    
+
+
+private:
+    int _size;
+    NodeType *head, *tail;
+};
+
+
+
+// SkipList Node
 template<class K,class V,int MAXLEVEL>
 class skiplist_node {
 public:
@@ -104,7 +247,15 @@ public:
 
 
     void insert(K searchKey, V newValue) {
+        int id = *((int*)arg);
+        int value = 0;
 
+        pthread_mutex_lock(&buffer_lock);
+        while (buffer.size() >= BILLION) {
+            pthread_cond_wait(&cond_producer, &mutex);
+        }
+
+        buffer.push()
     }
 
 
@@ -113,15 +264,21 @@ public:
     }
 
 
-    bool empty() const
-    {
-        return ( m_pHeader->forwards[1] == m_pTail );
+    std::string printList() {
+
+    }
+
+
+    bool empty() const {
+        bool check;
+        m_pHeader->read_lock();
+        check = m_pHeader->forwards[1] == m_pTail
+        m_pHeader->unlock();
+        return check;
     }
 
 
 private:
-    queue<int, int> buffer;
-    pthread_mutex_t buffer_lock;
     pthread_cond_t producer_cond;
     pthread_cond_t consumer_cond;
 
@@ -246,9 +403,8 @@ private:
     }
  
  
-    std::string _printList()
-    {
-	int i=0;
+    std::string _printList() {
+	    int i=0;
         std::stringstream sstr;
         NodeType* currNode = m_pHeader->forwards[1];
         while ( currNode != m_pTail ) {
