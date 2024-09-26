@@ -1,29 +1,31 @@
+// SkipList v0.1
+
 #include <iostream>
 #include <sstream>
 #include <pthread.h>
-#include <queue>
 
 #define BILLION  1000000000L
 
 using namespace std;
  
 
+
 // Linked List Node
+template<class K,class V>
 class linked_list_node {
 public:
     linked_list_node* next;
     int action;
-    int type;
-    int id;
-    int value;
+    K key;
+    V value;
 
 
     linked_list_node() {
         next = NULL;
-        type = 0;
-        action = 0;
-        value = 0;
-        id = -1;
+        action = -1;
+        value = -1;
+        key = -1;
+        pthread_rwlock_init(&lock, NULL);
     }
 
 
@@ -52,34 +54,49 @@ private:
 };
 
 
+
 // Circular Linked List
+template <class K, class V>
 class circular_linked_list {
 private:
-    typedef linked_list_node NodeType;
+    typedef linked_list_node<K, V> NodeType;
+    int _size;
+    NodeType *head, *tail;
 
 
+public:
     circular_linked_list(int size) {
         _size = size;
 
         head = new NodeType();
-        NodeType *currNode = head, *tail, *temp;
+        NodeType *curr_node = head, *temp;
         for(int i=0; i<size; i++) {
-            currNode->write_lock();
-            currNode->next = new NodeType();
-            temp = currNode->next;
-            currNode->unlock();
-            currNode = temp;
+            curr_node->write_lock();
+            curr_node->next = new NodeType();
+            temp = curr_node->next;
+            curr_node->unlock();
+            curr_node = temp;
         }
-        currNode->write_lock();
-        currNode->next = head;
-        currNode->unlock();
-        head->read_lock();
-        tail = head->next;
-        head->unlock();
+        curr_node->write_lock();
+        curr_node->next = head;
+        curr_node->unlock();
+        tail = head;
     }
 
 
-    bool insert(int id, int type, int action, int value) {
+    ~circular_linked_list() {
+        NodeType *curr_node = head;
+        for (int i = 0; i < _size; i++) {
+            curr_node->write_lock();
+            NodeType *temp = curr_node->next;
+            curr_node->unlock();
+            delete curr_node;
+            curr_node = temp;
+        }
+    }
+
+
+    bool push(int action, K key, V value) {
         NodeType *temp;
         tail->write_lock();
 
@@ -88,9 +105,8 @@ private:
             return false;
         }
 
-        tail->id = id;
-        tail->type = type;
         tail->action = action;
+        tail->key = key;
         tail->value = value;
         temp = tail->next;
 
@@ -101,21 +117,24 @@ private:
     }
 
 
-    bool pop(int *id, int *type, int *action, int *value) {
+    bool pop(int *action, K* key, V *value) {
         NodeType *temp;
         head->write_lock();
         
-        if (head->next == tail) {
+        if (head->action == -1) {
             head->unlock();
             return false;
         }
 
-        *id = tail->id;
-        tail->id = -1;
-        *type = tail->type;
-        *action = tail->action;
-        *value = tail->value;
+        *action = head->action;
+        *key = head->key;
+        *value = head->value;
+        head->action = -1;
+        temp = head->next;
 
+        head->unlock();
+        head = temp;
+        return true;
     }
 
 
@@ -142,12 +161,22 @@ private:
     }
 
 
-    
-
-
-private:
-    int _size;
-    NodeType *head, *tail;
+    void print() {
+        NodeType *curr_node = head, *temp;
+        cout << "Linked List"<<endl;
+        while(true) {
+            curr_node->read_lock();
+            if (curr_node->action == -1) {
+                curr_node->unlock();
+                break;
+            }
+            cout << "(action: " << curr_node->action << "\tkey: " << curr_node->key << "\tvalue: " << curr_node->value << ")" << endl;
+            temp = curr_node->next;
+            curr_node->unlock();
+            curr_node = temp;
+        }
+        cout << "end" << endl;
+    }
 };
 
 
@@ -155,6 +184,10 @@ private:
 // SkipList Node
 template<class K,class V,int MAXLEVEL>
 class skiplist_node {
+private:
+    pthread_rwlock_t lock;
+
+
 public:
     skiplist_node() {
         for ( int i=1; i<=MAXLEVEL; i++ ) {
@@ -202,125 +235,92 @@ public:
     K key;
     V value;
     skiplist_node<K,V,MAXLEVEL>* forwards[MAXLEVEL+1];
-
-
-private:
-    pthread_rwlock_t lock;
 };
  
 
 
 //SkipList
 template<class K, class V, int MAXLEVEL = 16>
-class skiplist
-{///////////////////////////////////////////////////////////////////////////////
-public:
+class skiplist{
+private:
     const int max_level;
     typedef K KeyType;
     typedef V ValueType;
     typedef skiplist_node<K,V,MAXLEVEL> NodeType;
- 
 
-    skiplist(K minKey,K maxKey):m_pHeader(NULL),m_pTail(NULL),
-                                max_curr_level(1),max_level(MAXLEVEL),
-                                m_minKey(minKey),m_maxKey(maxKey)
-    {
-        m_pHeader = new NodeType(m_minKey);
-        m_pTail = new NodeType(m_maxKey);
-        for ( int i=1; i<=MAconst int max_level;XLEVEL; i++ ) {
-            m_pHeader->forwards[i] = m_pTail;
+    int num_thread;
+    pthread_t *threads;
+    int num_run_thread;
+    int num_insert_thread;
+    bool pause;
+    bool run;
+
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+
+
+    static void* proc(void* arg) {
+        skiplist<int, int>* pSelf = static_cast<skiplist<int, int>*>(arg);
+
+        int action;
+        K key;
+        V value;
+        while(pSelf->run) {
+            while(pSelf->run) {
+                bool check = pSelf->input_buffer->pop(&action, &key, &value);
+                if (check) {
+                    pSelf->num_run_thread +=1;
+                    break;
+                }
+            }
+            switch(action) {
+            case 0:
+                pSelf->_insert(key, value);
+                break;
+            case 1:
+
+                pSelf->_find(key);
+            }
+            pSelf->num_run_thread -=1;
         }
-    }
- 
 
-    virtual ~skiplist()
-    {
-        NodeType* currNode = m_pHeader->forwards[1];
-        while ( currNode != m_pTail ) {
-            NodeType* tempNode = currNode;
-            currNode = currNode->forwards[1];
-            delete tempNode;
-        }
-        delete m_pHeader;
-        delete m_pTail;
-    }
-
-
-    void insert(K searchKey, V newValue) {
-        int id = *((int*)arg);
-        int value = 0;
-
-        pthread_mutex_lock(&buffer_lock);
-        while (buffer.size() >= BILLION) {
-            pthread_cond_wait(&cond_producer, &mutex);
-        }
-
-        buffer.push()
-    }
-
-
-    V find(K searchKey) {
-
-    }
-
-
-    std::string printList() {
-
-    }
-
-
-    bool empty() const {
-        bool check;
-        m_pHeader->read_lock();
-        check = m_pHeader->forwards[1] == m_pTail
-        m_pHeader->unlock();
-        return check;
-    }
-
-
-private:
-    pthread_cond_t producer_cond;
-    pthread_cond_t consumer_cond;
-
-
-    void _skiplist() {
-
+        return nullptr;
     }
 
 
     void _insert(K searchKey,V newValue)
     {
+        cout << "_insert" << endl;
         skiplist_node<K,V,MAXLEVEL>* update[MAXLEVEL];
-        NodeType *currNode = m_pHeader, *temp;
+        NodeType *curr_node = m_pHeader, *temp;
         bool check = false;
         
         for(int level=max_curr_level; level >=1; level--) {
-            while (true) {
-                currNode->read_lock();
-                if (currNode->forwards[level]->key >= searchKey) {
-                    currNode->unlock();
+            while (run) {
+                curr_node->read_lock();
+                if (curr_node->forwards[level]->key >= searchKey) {
+                    curr_node->unlock();
                     break;
                 }
-                temp = currNode->forwards[level];
-                currNode->unlock();
-                currNode = temp;
+                temp = curr_node->forwards[level];
+                curr_node->unlock();
+                curr_node = temp;
             }
-            update[level] = currNode;
+            update[level] = curr_node;
         }
-        currNode->read_lock();
-        temp = currNode->forwards[1];
-        currNode->unlock();
-        currNode = temp;
+        curr_node->read_lock();
+        temp = curr_node->forwards[1];
+        curr_node->unlock();
+        curr_node = temp;
 
-        currNode->read_lock();
-        check = currNode->key == searchKey;
-        currNode->unlock();
+        curr_node->read_lock();
+        check = curr_node->key == searchKey;
+        curr_node->unlock();
 
-        
         if (check) {
-            currNode->write_lock();
-            currNode->value = newValue;
-            currNode->unlock();
+            curr_node->write_lock();
+            curr_node->value = newValue;
+            curr_node->unlock();
         }
         else {
             int newlevel = randomLevel();
@@ -330,37 +330,37 @@ private:
                 }
                 max_curr_level = newlevel;
             }
-            currNode = new NodeType(searchKey,newValue);
-            currNode->write_lock();
+            curr_node = new NodeType(searchKey,newValue);
+            curr_node->write_lock();
             for ( int lv=1; lv<=max_curr_level; lv++ ) {
                 update[lv]->write_lock();
-                currNode->forwards[lv] = update[lv]->forwards[lv];
-                update[lv]->forwards[lv] = currNode;
+                curr_node->forwards[lv] = update[lv]->forwards[lv];
+                update[lv]->forwards[lv] = curr_node;
                 update[lv]->unlock();
             }
-            currNode->unlock();
+            curr_node->unlock();
         }
     }
  
     void erase(K searchKey)
     {
         skiplist_node<K,V,MAXLEVEL>* update[MAXLEVEL];
-        NodeType* currNode = m_pHeader;
+        NodeType* curr_node = m_pHeader;
         for(int level=max_curr_level; level >=1; level--) {
-            while ( currNode->forwards[level]->key < searchKey ) {
-                currNode = currNode->forwards[level];
+            while ( curr_node->forwards[level]->key < searchKey ) {
+                curr_node = curr_node->forwards[level];
             }
-            update[level] = currNode;
+            update[level] = curr_node;
         }
-        currNode = currNode->forwards[1];
-        if ( currNode->key == searchKey ) {
+        curr_node = curr_node->forwards[1];
+        if ( curr_node->key == searchKey ) {
             for ( int lv = 1; lv <= max_curr_level; lv++ ) {
-                if ( update[lv]->forwards[lv] != currNode ) {
+                if ( update[lv]->forwards[lv] != curr_node ) {
                     break;
                 }
-                update[lv]->forwards[lv] = currNode->forwards[lv];
+                update[lv]->forwards[lv] = curr_node->forwards[lv];
             }
-            delete currNode;
+            delete curr_node;
             // update the max level
             while ( max_curr_level > 1 && m_pHeader->forwards[max_curr_level] == NULL ) {
                 max_curr_level--;
@@ -369,54 +369,137 @@ private:
     }
  
     //const NodeType* find(K searchKey)
-    V _find(K searchKey) {
-        NodeType *currNode = m_pHeader, *temp;
+    void _find(K searchKey) {
+        NodeType *curr_node = m_pHeader, *temp;
         bool check;
 
         for(int level=max_curr_level; level >=1; level--) {
-            while (true) {
-                currNode->read_lock();
-                if (currNode->forwards[level]->key >= searchKey) {
-                    currNode->unlock();
+            while (run) {
+                curr_node->read_lock();
+                if (curr_node->forwards[level]->key >= searchKey) {
+                    curr_node->unlock();
                     break;
                 }
-                temp = currNode->forwards[level];
-                currNode->unlock();
-                currNode = temp;
+                temp = curr_node->forwards[level];
+                curr_node->unlock();
+                curr_node = temp;
             }
         }
 
-        currNode->read_lock();
-        temp = currNode->forwards[1];
-        currNode->unlock();
-        currNode = temp;
-        currNode->read_lock();
-        check = currNode->key == searchKey;
-        currNode->unlock();
+        curr_node->read_lock();
+        temp = curr_node->forwards[1];
+        curr_node->unlock();
+        curr_node = temp;
+        curr_node->read_lock();
+        check = curr_node->key == searchKey;
+        curr_node->unlock();
+        cout << check << searchKey << endl;
         if (check) {
-            return currNode->value;
+            curr_node->read_lock();
+            sstr << curr_node->value << "\t";
+            temp = curr_node->forwards[1];
+            curr_node->unlock();
+            curr_node = temp;
+            curr_node->read_lock();
+            sstr << curr_node->value << endl;
+            curr_node->unlock();
+
         }
-        else {
-            //return NULL;
-            return -1;
-        }
-    }
- 
- 
-    std::string _printList() {
-	    int i=0;
-        std::stringstream sstr;
-        NodeType* currNode = m_pHeader->forwards[1];
-        while ( currNode != m_pTail ) {
-            //sstr << "(" << currNode->key << "," << currNode->value << ")" << endl;
-            sstr << currNode->key << " ";
-            currNode = currNode->forwards[1];
-	    i++;
-	    if(i>200) break;
-        }
-        return sstr.str();
+        else
+            sstr << "ERROR: Not Found: " << searchKey << endl;
     }
 
+
+public:
+    circular_linked_list<K, V> *input_buffer;
+    std::stringstream sstr;
+
+
+    skiplist(K minKey,K maxKey, int num_thread = 2):m_pHeader(NULL),m_pTail(NULL),
+                                max_curr_level(1),max_level(MAXLEVEL),
+                                m_minKey(minKey),m_maxKey(maxKey),num_thread(num_thread) {
+        m_pHeader = new NodeType(m_minKey);
+        m_pTail = new NodeType(m_maxKey);
+
+        cond = PTHREAD_COND_INITIALIZER;
+        mutex = PTHREAD_MUTEX_INITIALIZER;
+
+        for ( int i=1; i<=MAXLEVEL; i++ ) {
+            m_pHeader->forwards[i] = m_pTail;
+        }
+        
+        input_buffer = new circular_linked_list<K, V> (100);
+        pause = false;
+        run = true;
+
+        threads = new pthread_t[num_thread];
+
+        for(int i=0; i<num_thread; i++) {
+            pthread_create(&threads[i], NULL, proc, this);
+        }
+    }
+ 
+
+    virtual ~skiplist()
+    {
+        NodeType* curr_node = m_pHeader->forwards[1];
+        while ( curr_node != m_pTail ) {
+            NodeType* tempNode = curr_node;
+            curr_node = curr_node->forwards[1];
+            delete tempNode;
+        }
+        delete input_buffer;
+        delete threads;
+        delete m_pHeader;
+        delete m_pTail;
+    }
+
+
+    void query(int action, long num) {
+        input_buffer->push(action, num, num);
+        input_buffer->print();
+    }
+
+    
+    void wait() {
+        while(num_run_thread!=0 && !input_buffer->is_empty());
+        cout << "end" << endl;
+        run = false;
+        for(int i=0; i<num_thread; i++)
+            pthread_cancel(threads[i]);
+    }
+
+
+    void printList() {
+        pause = true;
+        while (num_run_thread != 0);
+
+        int i=0;
+
+        m_pHeader->read_lock();
+        NodeType* curr_node = m_pHeader->forwards[1], *temp;
+        m_pHeader->unlock();
+
+        while ( curr_node != m_pTail ) {
+            //sstr << "(" << curr_node->key << "," << curr_node->value << ")" << endl;
+            curr_node->read_lock();
+            sstr << curr_node->key << " ";
+            temp = curr_node->forwards[1];
+            curr_node->unlock();
+            i++;
+            if(i>200) break;
+        }
+        pause = false;
+    }
+
+
+    bool empty() const {
+        bool check;
+        m_pHeader->read_lock();
+        check = m_pHeader->forwards[1] == m_pTail;
+        m_pHeader->unlock();
+        return check;
+    }
 
  
 protected:
@@ -439,6 +522,3 @@ protected:
     skiplist_node<K,V,MAXLEVEL>* m_pHeader;
     skiplist_node<K,V,MAXLEVEL>* m_pTail;
 };
- 
-///////////////////////////////////////////////////////////////////////////////
- 
