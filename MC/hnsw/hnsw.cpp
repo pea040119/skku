@@ -20,40 +20,56 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
 	nearestNeighbors.insert(make_pair(td, ep));
 	isVisited.insert(ep);
 	
-	while (!candidates.empty()) {
-		auto ci = candidates.begin(); 
-		candidates.erase(candidates.begin());
-		int nid = ci->second;
-		auto fi = nearestNeighbors.end(); 
-		fi--;
-		if (ci->first > fi->first) 
-			break;
+	#pragma omp parallel shared(layerEdgeLists, isVisited, nearestNeighbors, candidates)
+	{
+		#pragma omp single
+		{
+			while (!candidates.empty()) {
+				auto ci = candidates.begin(); 
+				candidates.erase(candidates.begin());
+				int nid = ci->second;
+				auto fi = nearestNeighbors.end(); 
+				fi--;
+				if (ci->first > fi->first) 
+					break;
 
-		#pragma omp parallel for
-		for (int ed: layerEdgeLists[lc][nid]) {
-			if (isVisited.find(ed) != isVisited.end()) 
-				continue;
-			fi = nearestNeighbors.end(); 
-			fi--;
-			#pragma omp critical
-			{
-				isVisited.insert(ed);
-			}
-			td = q.dist(items[ed]);
+				for (int ed: layerEdgeLists[lc][nid]) {
+					#pragma omp task firstprivate(ed)
+					{
+						bool visited;
+						#pragma omp critical
+						{
+							visited = isVisited.find(ed) != isVisited.end();
+						}
+						if (visited)
+							continue;
+						fi = nearestNeighbors.end(); 
+						fi--;
+						#pragma omp critical
+						{
+							isVisited.insert(ed);
+						}
+						td = q.dist(items[ed]);
 
-			if ((td < fi->first) || nearestNeighbors.size() < ef) {
-				#pragma omp critical
-				{
-					candidates.insert(make_pair(td, ed));
-					nearestNeighbors.insert(make_pair(td, ed));
-					if (nearestNeighbors.size() > ef) 
-						nearestNeighbors.erase(fi);
+						if ((td < fi->first) || nearestNeighbors.size() < ef) {
+							#pragma omp critical
+							{
+								candidates.insert(make_pair(td, ed));
+								nearestNeighbors.insert(make_pair(td, ed));
+								if (nearestNeighbors.size() > ef) 
+									nearestNeighbors.erase(fi);
+							}
+						}
+					}
 				}
 			}
 		}
 	}
 	vector<int> results;
-	for(auto &p: nearestNeighbors) results.push_back(p.second);
+
+	// 병렬화 고려 사항
+	for(auto &p: nearestNeighbors) 
+		results.push_back(p.second);
 	return results;
 }
 
