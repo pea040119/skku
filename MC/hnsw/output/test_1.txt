@@ -1,3 +1,3 @@
 /home/swe3021/hnsw_dataset/vectorset_1.100K.fbin
 START BUILDING INDEX
-.
+...
