@@ -208,7 +208,7 @@ int main(int argc, char* argv[]) {
 		exit(0);
 	}
 
-	randomTest(10000, dimensions, numQueries, k, numThreads, workload);
+	randomTest(numPoints, dimensions, numQueries, k, numThreads, workload);
 	return 0;
 }
 
