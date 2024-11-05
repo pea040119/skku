@@ -36,18 +36,21 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
         }
 
         for (int ed : layerEdgeLists[lc][nid]) {
-            #pragma omp task firstprivate(ed, fi, td)
+            #pragma omp task firstprivate(q, ed, ef) shared(isVisited, candidates, nearestNeighbors, items)
             {
                 bool visited = false;
-                #pragma omp critical(isVisited)
+                #pragma omp critical
                 {
                     visited = isVisited.find(ed) != isVisited.end();
+                    if (!visited) 
+                        isVisited.insert(ed);
+                    // cout << "visited: " << visited << endl;
                 }
+                // cout << "visited: " << visited << endl;
                 if (!visited) {
                     double local_td = q.dist(items[ed]);
                     bool insert_candidate = false;
-                    
-                    #pragma omp critical shared(nearestNeighbors)
+                    #pragma omp critical
                     {
                         auto local_fi = nearestNeighbors.end();
                         local_fi--;
@@ -59,15 +62,10 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
                             }
                         }
                     }
-                    
                     if (insert_candidate) {
-                        #pragma omp critical(candidates)
+                        #pragma omp critical
                         {
                             candidates.insert(make_pair(local_td, ed));
-                        }
-                        #pragma omp critical(isVisited)
-                        {
-                            isVisited.insert(ed);
                         }
                     }
                 }
@@ -92,7 +90,7 @@ vector<int> HNSWGraph::KNNSearch(Item& q, int K) {
 	int maxLyer = layerEdgeLists.size() - 1;
 	int ep = enterNode;
     vector<int> result;
-    #pragma omp parallel num_threads(40) shared(ep, q, result)
+    #pragma omp parallel num_threads(40) shared(ep, q, K, result)
     {
         #pragma omp single
         {
@@ -145,7 +143,7 @@ void HNSWGraph::Insert(Item& q) {
     int ep = enterNode;
     #pragma omp parallel num_threads(40) shared(ep, q)
     {
-        #pragma omp single nowait
+        #pragma omp single
         {
             for (int i = maxLyer; i > l; i--) 
                 ep = searchLayer(q, ep, 1, i)[0];

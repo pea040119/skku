@@ -25,6 +25,7 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
 		if (ci->first > fi->first) break;
 		for (int ed: layerEdgeLists[lc][nid]) {
 			if (isVisited.find(ed) != isVisited.end()) continue;
+			// cout << "check" << endl;
 			fi = nearestNeighbors.end(); fi--;
 			isVisited.insert(ed);
 			td = q.dist(items[ed]);

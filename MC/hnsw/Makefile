@@ -1,7 +1,7 @@
 .PHONY: all test
 
 all:
-	g++ -fopenmp -o output/hnsw src/main.cpp src/hnsw.cpp -lm
+	g++ -fopenmp -o debug/hnsw src/main.cpp src/hnsw.cpp -lm
 
 hnsw:
 	g++ -fopenmp -o debug/hnsw_$(num) src/main.cpp src/hnsw.cpp -lm
@@ -10,6 +10,10 @@ hnsw:
 single:
 	g++ -fopenmp -o debug/single src/main.cpp src/hnsw_single.cpp -lm
 	debug/single -k100 -t40 -w 1 > output/single.txt
+
+single_1:
+	g++ -fopenmp -o debug/single_1 src/main.cpp src/hnsw_single.cpp -lm
+	debug/single_1 -k100 -t40 -w 1 > output/single_1.txt
 
 test:
 	@for i in $(shell seq 1 10); do \

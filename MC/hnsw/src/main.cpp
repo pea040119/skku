@@ -93,6 +93,7 @@ void randomTest(int numItems, int dim, int numQueries, int K, int numThreads, in
 
 	double begin_query = omp_get_wtime();
 	cout << "START QUERY" << endl;
+	cout << K << endl;
 
 	double local_hnsw_begin_time = omp_get_wtime();
 
