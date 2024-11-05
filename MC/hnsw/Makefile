@@ -2,10 +2,17 @@
 
 all:
 	g++ -fopenmp -o output/hnsw src/main.cpp src/hnsw.cpp -lm
-test:
-	g++ -fopenmp -o debug/test_$(num) src/main.cpp src/hnsw.cpp -lm
-	debug/test_$(num) -k100 -t40 -w 1 > output/test_$(num).txt
+run:
+	g++ -fopenmp -o debug/hnsw_$(num) src/main.cpp src/hnsw.cpp -lm
+	debug/hnsw_$(num) -k100 -t40 -w 1 > output/hnsw_$(num).txt
 
 single:
 	g++ -fopenmp -o debug/single src/main.cpp src/hnsw_single.cpp -lm
 	debug/single -k100 -t40 -w 1 > output/single.txt
+
+test:
+	@for i in $(shell seq 1 10); do \
+		echo "Iteration $$i"; \
+		debug/hnsw_2 -k100 -t40 -w 1 > output/test_$(i).txt; \
+	done
+
