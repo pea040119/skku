@@ -2,7 +2,8 @@
 
 all:
 	g++ -fopenmp -o output/hnsw src/main.cpp src/hnsw.cpp -lm
-run:
+
+hnsw:
 	g++ -fopenmp -o debug/hnsw_$(num) src/main.cpp src/hnsw.cpp -lm
 	debug/hnsw_$(num) -k100 -t40 -w 1 > output/hnsw_$(num).txt
 
@@ -16,3 +17,10 @@ test:
 		debug/hnsw_1 -k100 -t40 -w 1 > output/test_1_$$i.txt; \
 	done
 
+run:
+	g++ -fopenmp -o debug/hnsw src/main.cpp src/hnsw.cpp -lm
+	debug/hnsw -k100 -t40 -w 1 > output/hnsw.txt
+
+clean:
+	rm -f output/test_*
+	rm -f output/hnsw_*
