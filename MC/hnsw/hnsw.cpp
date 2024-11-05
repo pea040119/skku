@@ -10,6 +10,8 @@
 #include <omp.h>
 using namespace std;
 
+
+
 vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
 	set<pair<double, int>> candidates;
 	set<pair<double, int>> nearestNeighbors;
@@ -41,23 +43,23 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
 						{
 							visited = isVisited.find(ed) != isVisited.end();
 						}
-						if (visited)
-							continue;
-						fi = nearestNeighbors.end(); 
-						fi--;
-						#pragma omp critical
-						{
-							isVisited.insert(ed);
-						}
-						td = q.dist(items[ed]);
-
-						if ((td < fi->first) || nearestNeighbors.size() < ef) {
+						if (!visited) {
+							fi = nearestNeighbors.end(); 
+							fi--;
 							#pragma omp critical
 							{
-								candidates.insert(make_pair(td, ed));
-								nearestNeighbors.insert(make_pair(td, ed));
-								if (nearestNeighbors.size() > ef) 
-									nearestNeighbors.erase(fi);
+								isVisited.insert(ed);
+							}
+							td = q.dist(items[ed]);
+
+							if ((td < fi->first) || nearestNeighbors.size() < ef) {
+								#pragma omp critical
+								{
+									candidates.insert(make_pair(td, ed));
+									nearestNeighbors.insert(make_pair(td, ed));
+									if (nearestNeighbors.size() > ef) 
+										nearestNeighbors.erase(fi);
+								}
 							}
 						}
 					}
@@ -73,18 +75,24 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
 	return results;
 }
 
+
 vector<int> HNSWGraph::KNNSearch(Item& q, int K) {
 	int maxLyer = layerEdgeLists.size() - 1;
 	int ep = enterNode;
-	for (int l = maxLyer; l >= 1; l--) ep = searchLayer(q, ep, 1, l)[0];
+	for (int l = maxLyer; l >= 1; l--) 
+		ep = searchLayer(q, ep, 1, l)[0];
 	return searchLayer(q, ep, K, 0);
 }
+
+
 
 void HNSWGraph::addEdge(int st, int ed, int lc) {
 	if (st == ed) return;
 	layerEdgeLists[lc][st].push_back(ed);
 	layerEdgeLists[lc][ed].push_back(st);
 }
+
+
 
 void HNSWGraph::Insert(Item& q) {
 	int nid = items.size();
