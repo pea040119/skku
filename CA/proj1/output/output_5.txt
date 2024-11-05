@@ -1,13 +1,13 @@
 inst 0: 001230b7 lui x1, 1191936
 inst 1: 0007b117 auipc x2, 503808
-inst 2: 7f90f1ef jal x3, 1023
+inst 2: 7f90f1ef jal x3, 65528
 inst 3: 12c28267 jalr x4, 300(x5)
 inst 4: 00730063 beq x6, x7, 0
-inst 5: fe731ee3 bne x6, x7, -3972
-inst 6: fe734ce3 blt x6, x7, -3976
-inst 7: fe735ae3 bge x6, x7, -3980
-inst 8: fe7368e3 bltu x6, x7, -3984
-inst 9: fe7376e3 bgeu x6, x7, -3988
+inst 5: fe731ee3 bne x6, x7, -4
+inst 6: fe734ce3 blt x6, x7, -8
+inst 7: fe735ae3 bge x6, x7, -12
+inst 8: fe7368e3 bltu x6, x7, -16
+inst 9: fe7376e3 bgeu x6, x7, -20
 inst 10: 00048403 lb x8, 0(x9)
 inst 11: 00049403 lh x8, 0(x9)
 inst 12: 0004a403 lw x8, 0(x9)

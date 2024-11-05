@@ -40,11 +40,11 @@ def decode_instruction(inst):
                     if func_7 in OPCODES[opcode][func_3]:
                         instruction = OPCODES[opcode][func_3][func_7]
                     else:
-                        return f"[!] Error: {opcode} {func_3} {func_7}unknown instruction"
+                        return f"unknown instruction"
                 else:
                     instruction = OPCODES[opcode][func_3]
             else:
-                return f"[!] Error: {opcode} {func_3} unknown instruction"
+                return f"unknown instruction"
         else:
             instruction = OPCODES[opcode]
 
@@ -64,24 +64,24 @@ def decode_instruction(inst):
                 imm_se = sign_extend(((inst >> 7) & 0x1F) | ((inst >> 25) << 5), 12)
                 return f"{instruction} {REGISTERS[rs2]}, {imm_se}({REGISTERS[rs1]})"
             case 0x63:
-                imm_se = sign_extend(((inst >> 7) & 0x1E) | ((inst >> 25) & 0x7E0) | ((inst >> 8) & 0x1) | ((inst >> 31) << 12), 13)
+                imm_se = sign_extend(((inst >> 8) & 0xF) << 1 | ((inst >> 25) & 0x3F) << 5 | ((inst >> 7) & 0x1) << 11 | ((inst >> 31) & 0x1) << 12, 13)
                 return f"{instruction} {REGISTERS[rs1]}, {REGISTERS[rs2]}, {imm_se}"
             case 0x37:
-                imm_se = inst & 0xFFFFF000
+                imm_se = sign_extend(inst & 0xFFFFF000, 32)
                 return f"{instruction} {REGISTERS[rd]}, {imm_se}"
             case 0x17:
                 imm_se = inst & 0xFFFFF000
                 return f"{instruction} {REGISTERS[rd]}, {imm_se}"
             case 0x6F:
-                imm_se = sign_extend(((inst >> 12) & 0xFF) | ((inst >> 20) & 0x1) | ((inst >> 21) & 0x3FF) | ((inst >> 31) << 20), 21)
+                imm_se = sign_extend(((inst >> 31) & 0x1) << 20 | ((inst >> 12) & 0xFF) << 12 | ((inst >> 20) & 0x1) << 11 | ((inst >> 21) & 0x3FF) << 1, 21)
                 return f"{instruction} {REGISTERS[rd]}, {imm_se}"
             case 0x67:
                 imm_se = sign_extend(inst >> 20, 12)
                 return f"{instruction} {REGISTERS[rd]}, {imm_se}({REGISTERS[rs1]})"
             case _:
-                return f"[!] Error: {opcode} is unknown instruction"
+                return f"unknown instruction"
     else:
-        return f"[!] Error: {opcode} is unknown instruction"
+        return f"unknown instruction"
 
 
 def read_binary_file(filename):
