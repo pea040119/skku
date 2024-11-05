@@ -25,7 +25,7 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
     isVisited.insert(ep);
     
     // cout << "[*] Start searchLayer parallel" << endl;
-    #pragma omp parallel
+    #pragma omp parallel num_threads(40)
     {
         #pragma omp single nowait
         {
