@@ -90,6 +90,15 @@ vector<int> HNSWGraph::KNNSearch(Item& q, int K) {
 	// cout << "[*] Start KNNSearch" << endl;
 	int maxLyer = layerEdgeLists.size() - 1;
 	int ep = enterNode;
+    // vector<int> result;
+    // #pragma omp parallel num_threads(40) shared(ep, q, result)
+    // {
+    //     #pragma omp single
+    //     {
+    //         for (int l = maxLyer; l >= 1; l--)
+    //             ep = searchLayer(q, ep, 1, l)[0];
+    //     }
+    // }
 
 	for (int l = maxLyer; l >= 1; l--) 
 		ep = searchLayer(q, ep, 1, l)[0];
@@ -132,14 +141,16 @@ void HNSWGraph::Insert(Item& q) {
 
 	// search up layer entrance
     int ep = enterNode;
-    #pragma omp parallel num_threads(40) shared(ep, q)
-    {
-        #pragma omp single nowait
-        {
-            for (int i = maxLyer; i > l; i--) 
-                ep = searchLayer(q, ep, 1, i)[0];
-        }
-    }
+    // #pragma omp parallel num_threads(40) shared(ep, q)
+    // {
+    //     #pragma omp single nowait
+    //     {
+    //         for (int i = maxLyer; i > l; i--) 
+    //             ep = searchLayer(q, ep, 1, i)[0];
+    //     }
+    // }
+    for (int i = maxLyer; i > l; i--) 
+        ep = searchLayer(q, ep, 1, i)[0];
 	
 	for (int i = min(l, maxLyer); i >= 0; i--) {
 		int MM = l == 0 ? MMax0 : MMax;

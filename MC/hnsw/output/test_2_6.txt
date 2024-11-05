@@ -1,0 +1,59 @@
+hnsw_dataset/vectorset_1.100K.fbin
+START BUILDING INDEX
+..........
+END BUILDING INDEX
+
+Build Time: 50.3161 sec
+
+START QUERY
+END QUERY
+Query 0 KNN Results: 99997 
+Query 1 KNN Results: 99997 
+Query 2 KNN Results: 99997 
+Query 3 KNN Results: 99997 
+Query 4 KNN Results: 99997 
+Thread 1 hnsw_time: 0.718791 sec
+Thread 2 hnsw_time: 0 sec
+Thread 3 hnsw_time: 0 sec
+Thread 4 hnsw_time: 0 sec
+Thread 5 hnsw_time: 0 sec
+Thread 6 hnsw_time: 0 sec
+Thread 7 hnsw_time: 0 sec
+Thread 8 hnsw_time: 0 sec
+Thread 9 hnsw_time: 0 sec
+Thread 10 hnsw_time: 0 sec
+Thread 11 hnsw_time: 0 sec
+Thread 12 hnsw_time: 0 sec
+Thread 13 hnsw_time: 0 sec
+Thread 14 hnsw_time: 2.61855e-322 sec
+Thread 15 hnsw_time: 6.91051e-310 sec
+Thread 16 hnsw_time: 6.90943e-310 sec
+Thread 17 hnsw_time: 6.91051e-310 sec
+Thread 18 hnsw_time: 4.62856e-319 sec
+Thread 19 hnsw_time: 2.37152e-322 sec
+Thread 20 hnsw_time: 3.89818e-321 sec
+Thread 21 hnsw_time: -0.0754007 sec
+Thread 22 hnsw_time: -0.239655 sec
+Thread 23 hnsw_time: 0.0159864 sec
+Thread 24 hnsw_time: -0.0352112 sec
+Thread 25 hnsw_time: -0.0453894 sec
+Thread 26 hnsw_time: 0.00052854 sec
+Thread 27 hnsw_time: 0.102419 sec
+Thread 28 hnsw_time: 0.00789251 sec
+Thread 29 hnsw_time: 0.287828 sec
+Thread 30 hnsw_time: 0.102431 sec
+Thread 31 hnsw_time: -0.000202536 sec
+Thread 32 hnsw_time: 0.0829399 sec
+Thread 33 hnsw_time: 0.04325 sec
+Thread 34 hnsw_time: -0.0326031 sec
+Thread 35 hnsw_time: 0.109759 sec
+Thread 36 hnsw_time: -0.00332857 sec
+Thread 37 hnsw_time: -0.245721 sec
+Thread 38 hnsw_time: -0.007305 sec
+Thread 39 hnsw_time: 0.0968754 sec
+Thread 40 hnsw_time: 0.0663277 sec
+Query Time: 0.718793 sec
+query/sec: 1391.22
+
+Total Duration: 51.0351 sec
+Average recall@K: 1e-05

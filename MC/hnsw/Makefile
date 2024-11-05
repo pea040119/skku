@@ -13,6 +13,6 @@ single:
 test:
 	@for i in $(shell seq 1 10); do \
 		echo "Iteration $$i"; \
-		debug/hnsw_2 -k100 -t40 -w 1 > output/test_$(i).txt; \
+		debug/hnsw_1 -k100 -t40 -w 1 > output/test_1_$$i.txt; \
 	done
 
