@@ -13,7 +13,15 @@ struct Item {
 	// Assume L2 distance
 	double dist(Item& other) {
 		double result = 0.0;
-		for (int i = 0; i < values.size(); i++) result += (values[i] - other.values[i]) * (values[i] - other.values[i]);
+		for (int i = 0; i < values.size(); i++) {
+			#pragma omp task shared(result, values, other)
+			{
+				double temp = (values[i] - other.values[i]) * (values[i] - other.values[i]);
+				#pragma omp atomic
+				result += temp;
+			}
+		}
+		#pragma omp taskwait
 		return result;
 	}
 };

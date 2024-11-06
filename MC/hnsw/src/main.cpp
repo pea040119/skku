@@ -76,10 +76,17 @@ void randomTest(int numItems, int dim, int numQueries, int K, int numThreads, in
 
 	HNSWGraph myHNSWGraph(20, 30, 30, 30, 4);
    
-	for (int i = 0; i < numItems; i++) {
-		if (i % 10000 == 0) cout << "." << std::flush;
-		myHNSWGraph.Insert(randomItems[i]);
+	#pragma omp parallel num_threads(numThreads) shared(myHNSWGraph, randomItems)
+	{
+		#pragma omp single
+		{
+			for (int i = 0; i < numItems; i++) {
+				if (i % 10000 == 0) cout << "." << std::flush;
+				myHNSWGraph.Insert(randomItems[i]);
+			}
+		}
 	}
+	
 	cout << endl;
 
 	cout << "END BUILDING INDEX" << endl << endl;
@@ -96,11 +103,17 @@ void randomTest(int numItems, int dim, int numQueries, int K, int numThreads, in
 	cout << K << endl;
 
 	double local_hnsw_begin_time = omp_get_wtime();
+	#pragma omp parallel num_threads(numThreads) shared(myHNSWGraph, queries, all_knns, K)
+	{
+		#pragma omp single
+		{
 
-	for (int i = 0; i < numQueries; i++) {
-		// HNSW Search
-		Item query = queries[i];
-		all_knns[i] = myHNSWGraph.KNNSearch(query, K);
+			for (int i = 0; i < numQueries; i++) {
+				// HNSW Search
+				Item query = queries[i];
+				all_knns[i] = myHNSWGraph.KNNSearch(query, K);
+			}
+		}
 	}
 
 	int thread_id = omp_get_thread_num();
