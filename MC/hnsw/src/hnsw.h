@@ -13,15 +13,10 @@ struct Item {
 	// Assume L2 distance
 	double dist(Item& other) {
 		double result = 0.0;
+		// #pragma omp parallel for firstprivate(values, other) reduction(+:result) num_threads(10)
 		for (int i = 0; i < values.size(); i++) {
-			#pragma omp task shared(result, values, other)
-			{
-				double temp = (values[i] - other.values[i]) * (values[i] - other.values[i]);
-				#pragma omp atomic
-				result += temp;
-			}
+			result += (values[i] - other.values[i]) * (values[i] - other.values[i]);
 		}
-		#pragma omp taskwait
 		return result;
 	}
 };
@@ -43,7 +38,7 @@ struct HNSWGraph {
 	int ml;
 
 	// number of items
-	int itemNum;
+	int itemNum=0;
 	// actual vector of the items
 	vector<Item> items;
 	// adjacent edge lists in each layer

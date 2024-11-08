@@ -1,0 +1,2 @@
+hnsw_dataset/vectorset_4.100K.fbin
+START BUILDING INDEX
