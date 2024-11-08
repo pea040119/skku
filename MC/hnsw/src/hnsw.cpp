@@ -16,45 +16,29 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
 	set<pair<double, int>> candidates;
 	set<pair<double, int>> nearestNeighbors;
 	unordered_set<int> isVisited;
-	Item *temp;
 
-	// #pragma omp critical 
-	{
-		temp = &items[ep];
-	}
-	
-
-	double td = q.dist(*temp);
-	// #pragma omp critical
+	double td = q.dist(items[ep]);
 	candidates.insert(make_pair(td, ep));
 	nearestNeighbors.insert(make_pair(td, ep));
 	isVisited.insert(ep);
+
 	while (!candidates.empty()) {
 		auto ci = candidates.begin(); 
 		candidates.erase(candidates.begin());
 		int nid = ci->second;
 		auto fi = nearestNeighbors.end(); 
 		fi--;
+		
 		if (ci->first > fi->first) 
 			break;
-		// #pragma omp parallel for parallelnum_threads(mp parallel for num_thread40) shared(layerEdgeLists, items, isVisited, candidates, nearestNeighbors)
-		vector<int>* temp_layer;
-		// #pragma omp critical
-		{
-			temp_layer = &layerEdgeLists[lc][nid];
-		}
-		for (int ed: *temp_layer) {
+		for (int ed: layerEdgeLists[lc][nid]) {
 			if (isVisited.find(ed) != isVisited.end()) 
 				continue;
 			// cout << "check" << endl;
 			fi = nearestNeighbors.end(); 
 			fi--;
 			isVisited.insert(ed);
-			// #pragma omp critical
-			{
-				temp = &items[ed];
-			}
-			td = q.dist(*temp);
+			td = q.dist(items[ed]);
 			if ((td < fi->first) || nearestNeighbors.size() < ef) {
 				candidates.insert(make_pair(td, ed));
 				nearestNeighbors.insert(make_pair(td, ed));
@@ -63,8 +47,10 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
 			}
 		}
 	}
+
 	vector<int> results;
-	for(auto &p: nearestNeighbors) results.push_back(p.second);
+	for(auto &p: nearestNeighbors) 
+		results.push_back(p.second);
 	return results;
 }
 
@@ -73,19 +59,13 @@ vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
 vector<int> HNSWGraph::KNNSearch(Item& q, int K) {
 	// cout << "[*] Start KNNSearch" << endl;
 	int maxLyer;
-	#pragma omp critical(lock)
-	{
 		maxLyer = layerEdgeLists.size() - 1;
-	}
 	int ep = enterNode;
     vector<int> result;
-    
-	#pragma omp critical(lock)
-	{
-		for (int l = maxLyer; l >= 1; l--)
-			ep = searchLayer(q, ep, 1, l)[0];
-		result = searchLayer(q, ep, K, 0);
-	}
+
+	for (int l = maxLyer; l >= 1; l--)
+		ep = searchLayer(q, ep, 1, l)[0];
+	result = searchLayer(q, ep, K, 0);
     
 	return result;
 }
@@ -121,29 +101,38 @@ void HNSWGraph::Insert(Item& q) {
 	for (int i = maxLyer; i > l; i--) 
 		ep = searchLayer(q, ep, 1, i)[0];
 	
-	for (int i = min(l, maxLyer); i >= 0; i--) {
-		int MM = l == 0 ? MMax0 : MMax;
-		vector<int> neighbors = searchLayer(q, ep, efConstruction, i);
-		vector<int> selectedNeighbors = vector<int>(neighbors.begin(), neighbors.begin()+min(int(neighbors.size()), M));
-		for (int n: selectedNeighbors) 
-			addEdge(n, nid, i);
-		#pragma omp parallel for num_threads(4) shared(layerEdgeLists, items, selectedNeighbors)
-		for (int n: selectedNeighbors) {
-			if (layerEdgeLists[i][n].size() > MM) {
-				vector<pair<double, int>> distPairs;
-				// #pragma omp parallel for num_threads(4) shared(distPairs) firstprivate(i, n, layerEdgeLists, items)
-				for (int nn: layerEdgeLists[i][n]) {
-					int local_dist = items[n].dist(items[nn]);
-					distPairs.emplace_back(local_dist, nn);
-				}
-				sort(distPairs.begin(), distPairs.end());
+	#pragma omp parallel num_threads(40) shared(layerEdgeLists, items) firstprivate(ep, nid, l, maxLyer, M, MMax, MMax0, efConstruction)
+	{
+		#pragma omp single
+		{
+			for (int i = min(l, maxLyer); i >= 0; i--) {
+				int MM = l == 0 ? MMax0 : MMax;
+				vector<int> neighbors = searchLayer(q, ep, efConstruction, i);
+				vector<int> selectedNeighbors = vector<int>(neighbors.begin(), neighbors.begin()+min(int(neighbors.size()), M));
+				for (int n: selectedNeighbors) 
+					addEdge(n, nid, i);
 				
-				layerEdgeLists[i][n].clear();
-				for (int d = 0; d < min(int(distPairs.size()), MM); d++) 
-					layerEdgeLists[i][n].push_back(distPairs[d].second);
+				#pragma omp task shared(layerEdgeLists, items, selectedNeighbors, MM) firstprivate(i)
+                {
+                    #pragma omp parallel for schedule(dynamic)
+                    for (int n: selectedNeighbors) {
+						if (layerEdgeLists[i][n].size() > MM) {
+							vector<pair<double, int>> distPairs;
+							for (int nn: layerEdgeLists[i][n]) 
+								distPairs.emplace_back(items[n].dist(items[nn]), nn);
+							sort(distPairs.begin(), distPairs.end());
+							layerEdgeLists[i][n].clear();
+							for (int d = 0; d < min(int(distPairs.size()), MM); d++) 
+								layerEdgeLists[i][n].push_back(distPairs[d].second);
+						}
+					}
+                }
+				ep = selectedNeighbors[0];
 			}
 		}
-		ep = selectedNeighbors[0];
 	}
-	if (l == layerEdgeLists.size() - 1) enterNode = nid;
+
+	// cout << "check" << endl;
+	if (l == layerEdgeLists.size() - 1) 
+		enterNode = nid;
 }

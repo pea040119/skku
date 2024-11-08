@@ -76,10 +76,8 @@ void randomTest(int numItems, int dim, int numQueries, int K, int numThreads, in
 
 	HNSWGraph myHNSWGraph(20, 30, 30, 30, 4);
    
-	
-	// #pragma omp parallel for num_threads(numThreads) shared(myHNSWGraph, randomItems) firstprivate(numItems) schedule(static)
 	for (int i = 0; i < numItems; i++) {
-		// #pragma omp critical
+		if (i % 10000 == 0) cout << "Inserting item " << i << endl;
 		myHNSWGraph.Insert(randomItems[i]);
 	}
 	
