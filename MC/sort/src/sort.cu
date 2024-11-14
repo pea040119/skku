@@ -3,87 +3,98 @@
 #include "sort.h"
 
 
-__device__ int __strncmp_kernel(const char *s1, const char *s2, size_t n) {
+__device__ int __strncmp_kernel(const char *str_1, const char *str_2, size_t n) {
     while (n--) {
-        if (*s1 != *s2) {
-            return *(unsigned char *)s1 - *(unsigned char *)s2;
+        if (*str_1 != *str_2) {
+            return *(unsigned char *)str_1 - *(unsigned char *)str_2;
         }
-        if (*s1 == '\0') {
+        if (*str_1 == '\0') {
             break;
         }
-        s1++;
-        s2++;
+        str_1++;
+        str_2++;
     }
     return 0;
 }
 
+__device__ int __strlen_kernel(const char *str) {
+    int len = 0;
+    while (str[len] != '\0') {
+        len++;
+    }
+    return len;
+}
 
-__global__ void __check_sorted_arr_kernel(int N, char **strArr, char **sortedArr, int *result) {
+
+__global__ void __check_sorted_arr_kernel(int N, char **str_arr, char **sorted_arr, int *result) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < N) {
-        if (__strncmp_kernel(strArr[idx], sortedArr[idx], 30) != 0) {
+        if (__strncmp_kernel(str_arr[idx], sorted_arr[idx], 30) != 0) {
             atomicAdd(result, 1);
         }
     }
 }
 
-int check_sorted_arr(int N, char **strArr, char **sortedArr) {
-    char **d_strArr, **d_sortedArr;
+int gpu_check_sorted_arr(int block_size, int N, char **str_arr, char **sorted_arr) {
+    if (N <= 0 || block_size <= 0 || str_arr == NULL || sorted_arr == NULL) 
+        return -1;
+
+    char **d_str_arr, **d_sorted_arr;
     int *d_result;
     int result = 0;
 
     // 메모리 할당
-    cudaMalloc((void**)&d_strArr, N * sizeof(char*));
-    cudaMalloc((void**)&d_sortedArr, N * sizeof(char*));
+    cudaMalloc((void**)&d_str_arr, N * sizeof(char*));
+    cudaMalloc((void**)&d_sorted_arr, N * sizeof(char*));
     cudaMalloc((void**)&d_result, sizeof(int));
 
     // 초기화
-    cudaMemcpy(d_strArr, strArr, N * sizeof(char*), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_sortedArr, sortedArr, N * sizeof(char*), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_str_arr, str_arr, N * sizeof(char*), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_sorted_arr, sorted_arr, N * sizeof(char*), cudaMemcpyHostToDevice);
     cudaMemcpy(d_result, &result, sizeof(int), cudaMemcpyHostToDevice);
 
     // 커널 실행
-    int blockSize = 256;
-    int numBlocks = (N + blockSize - 1) / blockSize;
-    __check_sorted_arr_kernel<<<numBlocks, blockSize>>>(N, d_strArr, d_sortedArr, d_result);
+    int block_num = (N + block_size - 1) / block_size;
+    __check_sorted_arr_kernel<<<block_num, block_size>>>(N, d_str_arr, d_sorted_arr, d_result);
 
     // 결과 복사
     cudaMemcpy(&result, d_result, sizeof(int), cudaMemcpyDeviceToHost);
 
     // 메모리 해제
-    cudaFree(d_strArr);
-    cudaFree(d_sortedArr);
+    cudaFree(d_str_arr);
+    cudaFree(d_sorted_arr);
     cudaFree(d_result);
 
     return result;
 }
 
 
-void bubble_sort(int N, char **strArr) {
-    char tmpStr[30];
+void bubble_sort(int N, char **str_arr) {
+    char temp_str[30];
 
     for(int i=1; i<N; i++)
     {
         for(int j=1; j<N; j++)
         {
-            if(strncmp(strArr[j-1], strArr[j],30)>0)
+            if(strncmp(str_arr[j-1], str_arr[j],30)>0)
             {
-                strncpy(tmpStr, strArr[j-1], 30);
-                strncpy(strArr[j-1], strArr[j], 30);
-                strncpy(strArr[j], tmpStr, 30);
+                strncpy(temp_str, str_arr[j-1], 30);
+                strncpy(str_arr[j-1], str_arr[j], 30);
+                strncpy(str_arr[j], temp_str, 30);
             }
         }
     }
 }
 
 
-__global__ void __p_r_sort_count_kernel(char **strArr, int *count, int N, int pos) {
+__global__ void __gpu_radix_sort_count_kernel(char **str_arr, int *count, int N, int pos) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < N) {
-        char ch = (pos < strlen(strArr[tid])) ? strArr[tid][pos] : 0;
+        char ch = (pos < __strlen_kernel(str_arr[tid])) ? str_arr[tid][pos] : 0;
         atomicAdd(&count[ch], 1);
     }
 }
 
-void parallel_radix_sort(int N, char **strArr) {
+
+void gpu_radix_sort(int block_size, int N, char **str_arr) {
 }

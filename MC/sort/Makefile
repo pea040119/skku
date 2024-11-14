@@ -4,5 +4,5 @@ all:
 
 sort:
 	nvcc -o debug/sort_$(type) src/main.cpp src/sort.cu
-	debug/sort_$(type) input.txt 100000 0 100 $(type) > output/sort_$(type).txt
+	debug/sort_$(type) input.txt 100000 0 10 256 $(type) > output/sort_$(type).txt
 

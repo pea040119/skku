@@ -1,5 +1,5 @@
-int check_sorted_arr(int N, char **strArr, char **sortedArr);
+int gpu_check_sorted_arr(int block_size, int N, char **str_arr, char **sorted_arr);
 
-void bubble_sort(int N, char **strArr);
+void bubble_sort(int N, char **str_arr);
 
-void parallel_radix_sort(int N, char **strArr);
+void gpu_radix_sort(int block_size, int N, char **atr_arr);

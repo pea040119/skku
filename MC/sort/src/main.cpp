@@ -8,14 +8,15 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    char tmpStr[30];
+    char temp_str[30];
     int i, j, N, pos, range, ret;
     string type;
     double elapsed;
     clock_t start, end;
+    int block_size = 256;
 
-    if(argc<6){
-	    cout << "Usage: " << argv[0] << " filename number_of_strings pos range type" << endl;
+    if(argc<7){
+	    cout << "Usage: " << argv[0] << " filename number_of_strings pos range block_size type" << endl;
 	    return 0;
     }
 
@@ -44,7 +45,13 @@ int main(int argc, char* argv[]) {
 	    return 0;
     }
 
-    type = argv[5];
+    ret=sscanf(argv[5],"%d", &block_size);
+    if(ret==EOF || block_size<0){
+	    cout << "Invalid range" << endl;
+	    return 0;
+    }
+
+    type = argv[6];
 
     auto bubble_sort_arr = new char*[N];
     auto sort_arr = new char*[N];
@@ -55,9 +62,9 @@ int main(int argc, char* argv[]) {
     }
 
     for(i=0; i<N; i++) {
-        inputfile >> tmpStr;
-        strcpy(bubble_sort_arr[i], tmpStr);
-        strcpy(sort_arr[i], tmpStr);
+        inputfile >> temp_str;
+        strcpy(bubble_sort_arr[i], temp_str);
+        strcpy(sort_arr[i], temp_str);
     }
 
     inputfile.close();
@@ -80,7 +87,7 @@ int main(int argc, char* argv[]) {
     cout << "[+] "<< type <<" SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
 
     cout << "[*] START CHECK SORTED ARRAY..." << endl;
-    int check = check_sorted_arr(N, bubble_sort_arr, sort_arr);
+    int check = gpu_check_sorted_arr(block_size, N, bubble_sort_arr, sort_arr);
     cout << "[+] START CHECK SORTED ARRAY" << endl;
 
     for(i=0; i<N; i++){
