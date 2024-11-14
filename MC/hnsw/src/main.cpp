@@ -55,11 +55,11 @@ vector<vector<int>> loadGroundTruth(const string& filename, int numQueries, int 
 
 void randomTest(int numItems, int dim, int numQueries, int K, int numThreads, int workload) {
 	ostringstream vectorsetFile;
-	vectorsetFile << "hnsw_dataset/vectorset_" << workload << ".100K.fbin";
+	vectorsetFile << "/home/swe3021/hnsw_dataset/vectorset_" << workload << ".100K.fbin";
 	cout << vectorsetFile.str() << endl;
 	ostringstream groundTruthFile;
-	groundTruthFile << "hnsw_dataset/ground_truth_" << workload << ".ibin";
-	string queryFilename = "hnsw_dataset/queries.1K.fbin";
+	groundTruthFile << "/home/swe3021/hnsw_dataset/ground_truth_" << workload << ".ibin";
+	string queryFilename = "/home/swe3021/hnsw_dataset/queries.1K.fbin";
 
 	vector<Item> randomItems = loadFile(vectorsetFile.str(), numItems, dim);
 
