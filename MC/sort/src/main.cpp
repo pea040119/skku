@@ -3,9 +3,11 @@
 #include<string.h>
 #include<ctime>
 
+using namespace std;
+
 #include "sort.h"
 
-using namespace std;
+
 
 int main(int argc, char* argv[]) {
     char temp_str[30];
@@ -80,7 +82,7 @@ int main(int argc, char* argv[]) {
 
     cout << "[*] START "<< type <<" SORTING..." << endl;
     start = clock();
-    bubble_sort(N, sort_arr);
+    gpu_radix_sort(block_size, N, sort_arr);
     end = clock();
     elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     cout << "[+] END "<< type <<" SORTING..." << endl;
@@ -89,6 +91,18 @@ int main(int argc, char* argv[]) {
     cout << "[*] START CHECK SORTED ARRAY..." << endl;
     int check = gpu_check_sorted_arr(block_size, N, bubble_sort_arr, sort_arr);
     cout << "[+] START CHECK SORTED ARRAY" << endl;
+    cout << "[+] CHECK SORTED ARRAY: " << (check == 0 ? "TRUE" : "FALSE") << endl;
+    cout << "[+] DIFFERENCE POSITION NUM: " << check << endl;
+
+    cout<<"\n[+] SORT BY BUBBLE" << endl;
+    for(i=pos; i<N && i<(pos+range); i++)
+        cout<< i << ": " << bubble_sort_arr[i]<<endl;
+    cout<<endl;
+
+    cout<<"\n[+] SORT BY "<< type << endl;
+    for(i=pos; i<N && i<(pos+range); i++)
+        cout<< i << ": " << sort_arr[i]<<endl;
+    cout<<endl;
 
     for(i=0; i<N; i++){
         delete[] bubble_sort_arr[i];
