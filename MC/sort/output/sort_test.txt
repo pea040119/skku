@@ -1,0 +1,36 @@
+[*] START INITIALIZING...
+[+] END INITIALIZING
+[*] START CHECK SORTED ARRAY...
+Free memory: 11746.25 MB
+Total memory: 12057.06 MB
+CUDA Error: an illegal memory access was encountered
+CUDA Error: an illegal memory access was encountered
+[+] START CHECK SORTED ARRAY
+[+] CHECK SORTED ARRAY: TRUE
+[+] DIFFERENCE POSITION NUM: 0
+
+[+] SORT BY BUBBLE
+0: WTd`RkRX
+1: MbWnGUAU
+2: Qw`a
+3: rXlD
+4: jU^Kkpuj_X
+5: Xc
+6: V
+7: y
+8: g
+9: [UW
+
+
+[+] SORT BY test
+0: WTd`RkRX
+1: MbWnGUAU
+2: Qw`a
+3: rXlD
+4: jU^Kkpuj_X
+5: Xc
+6: V
+7: y
+8: g
+9: [UW
+

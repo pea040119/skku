@@ -11,6 +11,15 @@ using namespace std;
 
 
 
+bool check_cuda_error(cudaError_t status) {
+    if (status != cudaSuccess) {
+        cout << "CUDA Error: " << cudaGetErrorString(status) << endl;
+        return false;
+    }
+    return true;
+}
+
+
 __device__ int __strncmp_kernel(const char *str_1, const char *str_2, size_t n) {
     while (n--) {
         if (*str_1 != *str_2) {
@@ -43,10 +52,10 @@ __device__ char __index_to_char_kernel(int n){
 
 
 
-__global__ void __check_sorted_arr_kernel(int N, char **str_arr, char **sorted_arr, int *result) {
+__global__ void __check_sorted_arr_kernel(int *N, char **str_arr, char **sorted_arr, int *result) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < N) {
-        if (__strncmp_kernel(str_arr[idx], sorted_arr[idx], 30) != 0) {
+    if (idx < *N) {
+        if (__strncmp_kernel(str_arr[idx], sorted_arr[idx], MAX_STR_LEN) != 0) {
             atomicAdd(result, 1);
         }
     }
@@ -57,21 +66,28 @@ int gpu_check_sorted_arr(int block_size, int N, char **str_arr, char **sorted_ar
         return -1;
 
     char **d_str_arr, **d_sorted_arr;
-    int *d_result;
-    int result = 12;
+    int *d_result, *d_N;
+    int result = 0;
+    size_t free_mem, total_mem;
 
-    cudaMalloc((void**)&d_str_arr, N * sizeof(char*));
-    cudaMalloc((void**)&d_sorted_arr, N * sizeof(char*));
-    cudaMalloc((void**)&d_result, sizeof(int));
+    cudaMemGetInfo(&free_mem, &total_mem);
+    printf("Free memory: %.2f MB\n", (float)free_mem / (1024 * 1024));
+    printf("Total memory: %.2f MB\n", (float)total_mem / (1024 * 1024));
 
-    cudaMemcpy(d_str_arr, str_arr, N * sizeof(char*), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_sorted_arr, sorted_arr, N * sizeof(char*), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_result, &result, sizeof(int), cudaMemcpyHostToDevice);
+    check_cuda_error(cudaMalloc((void**)&d_str_arr, N * sizeof(char) * MAX_STR_LEN));
+    check_cuda_error(cudaMalloc((void**)&d_sorted_arr, N * sizeof(char) * MAX_STR_LEN));
+    check_cuda_error(cudaMalloc((void**)&d_result, sizeof(int)));
+    check_cuda_error(cudaMalloc((void**)&d_N, sizeof(int)));
+
+    check_cuda_error(cudaMemcpy(d_str_arr, str_arr, N * sizeof(char) * MAX_STR_LEN, cudaMemcpyHostToDevice));
+    check_cuda_error(cudaMemcpy(d_sorted_arr, sorted_arr, N * sizeof(char) * MAX_STR_LEN, cudaMemcpyHostToDevice));
+    check_cuda_error(cudaMemset(d_result, 0, sizeof(int)));
+    check_cuda_error(cudaMemcpy(d_N, &N, sizeof(int), cudaMemcpyHostToDevice));
 
     int block_num = (N + block_size - 1) / block_size;
-    __check_sorted_arr_kernel<<<block_num, block_size>>>(N, d_str_arr, d_sorted_arr, d_result);
-
-    cudaMemcpy(&result, d_result, sizeof(int), cudaMemcpyDeviceToHost);
+    __check_sorted_arr_kernel<<<block_num, block_size>>>(d_N, d_str_arr, d_sorted_arr, d_result);
+    check_cuda_error(cudaDeviceSynchronize());
+    check_cuda_error(cudaMemcpy(&result, d_result, sizeof(int), cudaMemcpyDeviceToHost));
 
     cudaFree(d_str_arr);
     cudaFree(d_sorted_arr);
