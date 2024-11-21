@@ -55,36 +55,36 @@ __device__ char __index_to_char_kernel(int n){
 __global__ void __check_sorted_arr_kernel(int *N, char **str_arr, char **sorted_arr, int *result) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < *N) {
-        if (__strncmp_kernel(str_arr[idx], sorted_arr[idx], MAX_STR_LEN) != 0) {
+        if (__strncmp_kernel(*(str_arr+idx), *(sorted_arr+idx), MAX_STR_LEN) != 0) {
             atomicAdd(result, 1);
-            printf("check_1\n");
-        }
-        else {
-            printf("check_2\n");
         }
     }
+}
+
+__global__ void __test(char *str) {
+    printf("%c\n", *(str+1));
 }
 
 int gpu_check_sorted_arr(int block_size, int N, char **str_arr, char **sorted_arr) {
     if (N <= 0 || block_size <= 0 || str_arr == NULL || sorted_arr == NULL) 
         return -1;
 
-    char **d_str_arr, **d_sorted_arr;
+    char **d_str_arr, **d_sorted_arr, *d_str;
     int *d_result, *d_N;
-    int result = 0;
-    size_t free_mem, total_mem;
+    int result;
 
-    cudaMemGetInfo(&free_mem, &total_mem);
-    printf("Free memory: %.2f MB\n", (float)free_mem / (1024 * 1024));
-    printf("Total memory: %.2f MB\n", (float)total_mem / (1024 * 1024));
-
-    check_cuda_error(cudaMalloc((void**)&d_str_arr, N * sizeof(char) * MAX_STR_LEN));
-    check_cuda_error(cudaMalloc((void**)&d_sorted_arr, N * sizeof(char) * MAX_STR_LEN));
+    check_cuda_error(cudaMalloc((void**)&d_str_arr, N * sizeof(char *)));
+    check_cuda_error(cudaMalloc((void**)&d_sorted_arr, N * sizeof(char *)));
     check_cuda_error(cudaMalloc((void**)&d_result, sizeof(int)));
     check_cuda_error(cudaMalloc((void**)&d_N, sizeof(int)));
-
-    check_cuda_error(cudaMemcpy(d_str_arr, str_arr, N * sizeof(char) * MAX_STR_LEN, cudaMemcpyHostToDevice));
-    check_cuda_error(cudaMemcpy(d_sorted_arr, sorted_arr, N * sizeof(char) * MAX_STR_LEN, cudaMemcpyHostToDevice));
+    for(int i=0; i<N; i++) {
+        check_cuda_error(cudaMalloc((void**)&d_str, sizeof(char) * MAX_STR_LEN));
+        check_cuda_error(cudaMemcpy(d_str, str_arr[i], sizeof(char) * MAX_STR_LEN, cudaMemcpyHostToDevice));
+        check_cuda_error(cudaMemcpy(d_str_arr+i, &d_str, sizeof(char*), cudaMemcpyHostToDevice));
+        check_cuda_error(cudaMalloc((void**)&d_str, sizeof(char) * MAX_STR_LEN));
+        check_cuda_error(cudaMemcpy(d_str, sorted_arr[i], sizeof(char) * MAX_STR_LEN, cudaMemcpyHostToDevice));
+        check_cuda_error(cudaMemcpy(d_sorted_arr+i, &d_str, sizeof(char*), cudaMemcpyHostToDevice));
+    }
     check_cuda_error(cudaMemset(d_result, 0, sizeof(int)));
     check_cuda_error(cudaMemcpy(d_N, &N, sizeof(int), cudaMemcpyHostToDevice));
 
@@ -94,6 +94,10 @@ int gpu_check_sorted_arr(int block_size, int N, char **str_arr, char **sorted_ar
 
     check_cuda_error(cudaMemcpy(&result, d_result, sizeof(int), cudaMemcpyDeviceToHost));
 
+    // for (int i=0; i<N; i++) {
+    //     check_cuda_error(cudaFree(*(str_arr+i)));
+    //     check_cuda_error(cudaFree(*(sorted_arr+i)));
+    // }
     cudaFree(d_str_arr);
     cudaFree(d_sorted_arr);
     cudaFree(d_result);
@@ -136,44 +140,49 @@ __global__ void __gpu_radix_sort_prefix_sum_kernel(int *count, int N) {
 }
 
 __global__ void __gpu_radix_sort_reorder_kernel(char **str_arr, char **output_arr, int *count, int N, int pos) {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < N) {
-        int index = (pos < __strlen_kernel(str_arr[tid])) ? __char_to_index_kernel(str_arr[tid][pos]) : 0;
-        int new_index = atomicAdd(&count[index], 1);
-        output_arr[new_index] = str_arr[tid];
-    }
+    // int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
 }
 
 void gpu_radix_sort(int block_size, int N, char **str_arr) {
     int *d_count;
     char **d_str_arr, **d_output;
+    char *d_str;
 
-    cudaMalloc((void**)&d_count, MAX_CHAR-MIN_CHAR+1 * sizeof(int));
-    cudaMalloc((void**)&d_str_arr, N * sizeof(char) * MAX_STR_LEN);
-    cudaMalloc((void**)&d_output, N * sizeof(char) * MAX_STR_LEN);
+    check_cuda_error(cudaMalloc((void**)&d_count, (MAX_CHAR-MIN_CHAR+1) * sizeof(int)));
+    check_cuda_error(cudaMalloc((void**)&d_str_arr, N * sizeof(char *)));
+    check_cuda_error(cudaMalloc((void**)&d_output, N * sizeof(char *)));
 
-    cudaMemcpy(d_str_arr, str_arr, N * sizeof(char) * MAX_STR_LEN, cudaMemcpyHostToDevice);
+    for (int i=0; i<N; i++) {
+        check_cuda_error(cudaMalloc((void**)&d_str, MAX_STR_LEN * sizeof(char)));
+        check_cuda_error(cudaMemcpy(d_str, str_arr[i], MAX_STR_LEN * sizeof(char), cudaMemcpyHostToDevice));
+        check_cuda_error(cudaMemcpy(d_str_arr+i, &d_str, sizeof(char *), cudaMemcpyHostToDevice));
+    }
 
     int block_num = (N + block_size - 1) / block_size;
 
-    // cout << "start sorting" << endl;
-
     for (int i=0; i<MAX_STR_LEN; i++) {
-        cudaMemset(d_count, 0, (MAX_CHAR - MIN_CHAR + 1) * sizeof(int));
+        // printf("i: %d\t", i);
+        for (int j=0; j<(MAX_CHAR - MIN_CHAR + 1); j++) {
+            check_cuda_error(cudaMemset(d_count+j, 0, sizeof(int)));
+        }
+        // printf("memset done\t");
         __gpu_radix_sort_count_kernel<<<block_num, block_size>>>(d_str_arr, d_count, N, i);
-        cudaDeviceSynchronize();
-        cout << "counting done" << endl;
+        check_cuda_error(cudaDeviceSynchronize());
+        // printf("count done\t");
         
         __gpu_radix_sort_prefix_sum_kernel<<<1, 1>>>(d_count, N);
-        cudaDeviceSynchronize();
-        cout << "prefix sum done" << endl;
+        check_cuda_error(cudaDeviceSynchronize());
+        // printf("prefix sum done\t");
 
-        // __gpu_radix_sort_reorder_kernel<<<block_num, block_size>>>(d_str_arr, d_output, d_count, N, i);
-        // // cout << "reordering done" << endl;
-        // cudaMemcpy(d_str_arr, d_output, N * sizeof(char*), cudaMemcpyDeviceToDevice);
+
+        __gpu_radix_sort_reorder_kernel<<<1, MAX_CHAR-MIN_CHAR+1>>>(d_str_arr, d_output, d_count, N, i);
+        check_cuda_error(cudaDeviceSynchronize());
+        // printf("\n");
+
     }
 
-    cudaMemcpy(str_arr, d_str_arr, N * sizeof(char*), cudaMemcpyDeviceToHost);
+    // cudaMemcpy(str_arr, d_output, N * sizeof(char*), cudaMemcpyDeviceToHost);
 
     cudaFree(d_count);
     cudaFree(d_str_arr);
