@@ -57,6 +57,10 @@ __global__ void __check_sorted_arr_kernel(int *N, char **str_arr, char **sorted_
     if (idx < *N) {
         if (__strncmp_kernel(str_arr[idx], sorted_arr[idx], MAX_STR_LEN) != 0) {
             atomicAdd(result, 1);
+            printf("check_1\n");
+        }
+        else {
+            printf("check_2\n");
         }
     }
 }
@@ -87,11 +91,13 @@ int gpu_check_sorted_arr(int block_size, int N, char **str_arr, char **sorted_ar
     int block_num = (N + block_size - 1) / block_size;
     __check_sorted_arr_kernel<<<block_num, block_size>>>(d_N, d_str_arr, d_sorted_arr, d_result);
     check_cuda_error(cudaDeviceSynchronize());
+
     check_cuda_error(cudaMemcpy(&result, d_result, sizeof(int), cudaMemcpyDeviceToHost));
 
     cudaFree(d_str_arr);
     cudaFree(d_sorted_arr);
     cudaFree(d_result);
+    cudaFree(d_N);
 
     return result;
 }
@@ -143,10 +149,10 @@ void gpu_radix_sort(int block_size, int N, char **str_arr) {
     char **d_str_arr, **d_output;
 
     cudaMalloc((void**)&d_count, MAX_CHAR-MIN_CHAR+1 * sizeof(int));
-    cudaMalloc((void**)&d_str_arr, N * sizeof(char*));
-    cudaMalloc((void**)&d_output, N * sizeof(char*));
+    cudaMalloc((void**)&d_str_arr, N * sizeof(char) * MAX_STR_LEN);
+    cudaMalloc((void**)&d_output, N * sizeof(char) * MAX_STR_LEN);
 
-    cudaMemcpy(d_str_arr, str_arr, N * sizeof(char*), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_str_arr, str_arr, N * sizeof(char) * MAX_STR_LEN, cudaMemcpyHostToDevice);
 
     int block_num = (N + block_size - 1) / block_size;
 
@@ -155,14 +161,16 @@ void gpu_radix_sort(int block_size, int N, char **str_arr) {
     for (int i=0; i<MAX_STR_LEN; i++) {
         cudaMemset(d_count, 0, (MAX_CHAR - MIN_CHAR + 1) * sizeof(int));
         __gpu_radix_sort_count_kernel<<<block_num, block_size>>>(d_str_arr, d_count, N, i);
-        // cout << "counting done" << endl;
+        cudaDeviceSynchronize();
+        cout << "counting done" << endl;
         
         __gpu_radix_sort_prefix_sum_kernel<<<1, 1>>>(d_count, N);
-        // cout << "prefix sum done" << endl;
+        cudaDeviceSynchronize();
+        cout << "prefix sum done" << endl;
 
-        __gpu_radix_sort_reorder_kernel<<<block_num, block_size>>>(d_str_arr, d_output, d_count, N, i);
-        // cout << "reordering done" << endl;
-        cudaMemcpy(d_str_arr, d_output, N * sizeof(char*), cudaMemcpyDeviceToDevice);
+        // __gpu_radix_sort_reorder_kernel<<<block_num, block_size>>>(d_str_arr, d_output, d_count, N, i);
+        // // cout << "reordering done" << endl;
+        // cudaMemcpy(d_str_arr, d_output, N * sizeof(char*), cudaMemcpyDeviceToDevice);
     }
 
     cudaMemcpy(str_arr, d_str_arr, N * sizeof(char*), cudaMemcpyDeviceToHost);
