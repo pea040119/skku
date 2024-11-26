@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
     bubble_sort(N, bubble_sort_arr);
     end = clock();
     elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    cout << "[+] END BUBBLE SORTING..." << endl;
+    cout << "[+] END BUBBLE SORTING" << endl;
     cout << "[+] BUBBLE SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
 
     cout << "[*] START "<< type <<" SORTING..." << endl;
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
     gpu_radix_sort(block_size, N, sort_arr);
     end = clock();
     elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    cout << "[+] END "<< type <<" SORTING..." << endl;
+    cout << "[+] END "<< type <<" SORTING" << endl;
     cout << "[+] "<< type <<" SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
 
     cout << "[*] START CHECK SORTED ARRAY..." << endl;
