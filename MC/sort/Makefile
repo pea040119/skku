@@ -6,3 +6,7 @@ sort:
 	nvcc -o debug/sort_$(type) src/main.cpp src/sort.cu
 	debug/sort_$(type) input.txt 100000 0 10 256 $(type) > output/sort_$(type).txt
 
+test:
+	nvcc -o debug/test src/main.cpp src/sort.cu
+	debug/test input.txt 1000 0 10 256 test > output/test.txt
+

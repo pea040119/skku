@@ -1,3 +1,67 @@
 [*] START INITIALIZING...
 [+] END INITIALIZING
 [*] START test SORTING...
+GPU memory: free = 12316835840 bytes, total = 12642746368 bytes
+i: 0
+i: 1
+i: 2
+i: 3
+i: 4
+i: 5
+i: 6
+i: 7
+i: 8
+i: 9
+i: 10
+i: 11
+i: 12
+i: 13
+i: 14
+i: 15
+i: 16
+i: 17
+i: 18
+i: 19
+i: 20
+i: 21
+i: 22
+i: 23
+i: 24
+i: 25
+i: 26
+i: 27
+i: 28
+i: 29
+done
+[+] END test SORTING...
+[+] test SORTING TIME ELAPSED: 6.51025sec
+[*] START CHECK SORTED ARRAY...
+[+] END CHECK SORTED ARRAY
+[+] CHECK SORTED ARRAY: FALSE
+[+] DIFFERENCE POSITION NUM: 99899
+
+[+] SORT BY BUBBLE
+0: WTd`RkRX
+1: MbWnGUAU
+2: Qw`a
+3: rXlD
+4: jU^Kkpuj_X
+5: Xc
+6: V
+7: y
+8: g
+9: [UW
+
+
+[+] SORT BY test
+0: A
+1: A
+2: A
+3: A
+4: A
+5: A
+6: A
+7: A
+8: A
+9: A
+
