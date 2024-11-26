@@ -1,0 +1,10 @@
+inst 0: 12300113 addi x2, x0, 291
+inst 1: 876541b7 lui x3, -2023407616
+inst 2: 3211e193 ori x3, x3, 801
+inst 3: fff00213 addi x4, x0, -1
+inst 4: 7ff1f293 andi x5, x3, 2047
+inst 5: ffc20313 addi x6, x4, -4
+inst 6: 01031393 slli x7, x6, 16
+inst 7: 0083d413 srli x8, x7, 8
+inst 8: 005424b3 slt x9, x8, x5
+inst 9: 7ff2a513 slti x10, x5, 2047

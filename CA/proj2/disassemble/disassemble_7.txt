@@ -1,0 +1,73 @@
+inst 0: 10010137 lui x2, 268500992
+inst 1: 00c00093 addi x1, x0, 12
+inst 2: 0080006f jal x0, 8
+inst 3: 1140006f jal x0, 276
+inst 4: fd010113 addi x2, x2, -48
+inst 5: 02112623 sw x1, 44(x2)
+inst 6: 02812423 sw x8, 40(x2)
+inst 7: 03010413 addi x8, x2, 48
+inst 8: 06400793 addi x15, x0, 100
+inst 9: fef42623 sw x15, -20(x8)
+inst 10: 0c800793 addi x15, x0, 200
+inst 11: fef42423 sw x15, -24(x8)
+inst 12: 00300793 addi x15, x0, 3
+inst 13: fef42223 sw x15, -28(x8)
+inst 14: fe842583 lw x11, -24(x8)
+inst 15: fec42503 lw x10, -20(x8)
+inst 16: 034000ef jal x1, 52
+inst 17: fea42023 sw x10, -32(x8)
+inst 18: fe442503 lw x10, -28(x8)
+inst 19: 058000ef jal x1, 88
+inst 20: fca42e23 sw x10, -36(x8)
+inst 21: fe042703 lw x14, -32(x8)
+inst 22: fdc42783 lw x15, -36(x8)
+inst 23: 00f707b3 add x15, x14, x15
+inst 24: 00078513 addi x10, x15, 0
+inst 25: 02c12083 lw x1, 44(x2)
+inst 26: 02812403 lw x8, 40(x2)
+inst 27: 03010113 addi x2, x2, 48
+inst 28: 00008067 jalr x0, 0(x1)
+inst 29: fe010113 addi x2, x2, -32
+inst 30: 00812e23 sw x8, 28(x2)
+inst 31: 02010413 addi x8, x2, 32
+inst 32: fea42623 sw x10, -20(x8)
+inst 33: feb42423 sw x11, -24(x8)
+inst 34: fec42703 lw x14, -20(x8)
+inst 35: fe842783 lw x15, -24(x8)
+inst 36: 00f767b3 or x15, x14, x15
+inst 37: 00078513 addi x10, x15, 0
+inst 38: 01c12403 lw x8, 28(x2)
+inst 39: 02010113 addi x2, x2, 32
+inst 40: 00008067 jalr x0, 0(x1)
+inst 41: fd010113 addi x2, x2, -48
+inst 42: 02112623 sw x1, 44(x2)
+inst 43: 02812423 sw x8, 40(x2)
+inst 44: 02912223 sw x9, 36(x2)
+inst 45: 03010413 addi x8, x2, 48
+inst 46: fca42e23 sw x10, -36(x8)
+inst 47: 10000717 auipc x14, 268435456
+inst 48: f4470713 addi x14, x14, -188
+inst 49: fdc42783 lw x15, -36(x8)
+inst 50: 00279793 slli x15, x15, 2
+inst 51: 00f707b3 add x15, x14, x15
+inst 52: 0007a483 lw x9, 0(x15)
+inst 53: 02c000ef jal x1, 44
+inst 54: 00050793 addi x15, x10, 0
+inst 55: 00f487b3 add x15, x9, x15
+inst 56: fef42623 sw x15, -20(x8)
+inst 57: fec42783 lw x15, -20(x8)
+inst 58: 00078513 addi x10, x15, 0
+inst 59: 02c12083 lw x1, 44(x2)
+inst 60: 02812403 lw x8, 40(x2)
+inst 61: 02412483 lw x9, 36(x2)
+inst 62: 03010113 addi x2, x2, 48
+inst 63: 00008067 jalr x0, 0(x1)
+inst 64: ff010113 addi x2, x2, -16
+inst 65: 00812623 sw x8, 12(x2)
+inst 66: 01010413 addi x8, x2, 16
+inst 67: 12300793 addi x15, x0, 291
+inst 68: 00078513 addi x10, x15, 0
+inst 69: 00c12403 lw x8, 12(x2)
+inst 70: 01010113 addi x2, x2, 16
+inst 71: 00008067 jalr x0, 0(x1)
+inst 72: 00000013 addi x0, x0, 0

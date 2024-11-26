@@ -1,0 +1,9 @@
+inst 0: 00a00093 addi x1, x0, 10
+inst 1: 00500113 addi x2, x0, 5
+inst 2: 402001b3 sub x3, x0, x2
+inst 3: 00219233 sll x4, x3, x2
+inst 4: 0021d2b3 srl x5, x3, x2
+inst 5: 4021d333 sra x6, x3, x2
+inst 6: 005263b3 or x7, x4, x5
+inst 7: 00524433 xor x8, x4, x5
+inst 8: 005274b3 and x9, x4, x5

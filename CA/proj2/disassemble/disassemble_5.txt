@@ -1,0 +1,11 @@
+inst 0: 100001b7 lui x3, 268435456
+inst 1: 0001a203 lw x4, 0(x3)
+inst 2: 0041a283 lw x5, 4(x3)
+inst 3: 07b20313 addi x6, x4, 123
+inst 4: 0061a023 sw x6, 0(x3)
+inst 5: 00c2d393 srli x7, x5, 12
+inst 6: 0071a423 sw x7, 8(x3)
+inst 7: 00818413 addi x8, x3, 8
+inst 8: 00042483 lw x9, 0(x8)
+inst 9: ffc42503 lw x10, -4(x8)
+inst 10: 00000013 addi x0, x0, 0

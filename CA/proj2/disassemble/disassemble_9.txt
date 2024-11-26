@@ -1,0 +1,12 @@
+inst 0: 200002b7 lui x5, 536870912
+inst 1: 04800313 addi x6, x0, 72
+inst 2: 06500393 addi x7, x0, 101
+inst 3: 06c00e13 addi x28, x0, 108
+inst 4: 06f00e93 addi x29, x0, 111
+inst 5: 00a00f13 addi x30, x0, 10
+inst 6: 0062a023 sw x6, 0(x5)
+inst 7: 0072a023 sw x7, 0(x5)
+inst 8: 01c2a023 sw x28, 0(x5)
+inst 9: 01c2a023 sw x28, 0(x5)
+inst 10: 01d2a023 sw x29, 0(x5)
+inst 11: 01e2a023 sw x30, 0(x5)

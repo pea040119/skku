@@ -1,0 +1,96 @@
+inst 0: 10010137 lui x2, 268500992
+inst 1: 00c00093 addi x1, x0, 12
+inst 2: 0540006f jal x0, 84
+inst 3: 1700006f jal x0, 368
+inst 4: fd010113 addi x2, x2, -48
+inst 5: 02812623 sw x8, 44(x2)
+inst 6: 03010413 addi x8, x2, 48
+inst 7: fca42e23 sw x10, -36(x8)
+inst 8: fcb42c23 sw x11, -40(x8)
+inst 9: fdc42783 lw x15, -36(x8)
+inst 10: 0007a783 lw x15, 0(x15)
+inst 11: fef42623 sw x15, -20(x8)
+inst 12: fd842783 lw x15, -40(x8)
+inst 13: 0007a703 lw x14, 0(x15)
+inst 14: fdc42783 lw x15, -36(x8)
+inst 15: 00e7a023 sw x14, 0(x15)
+inst 16: fd842783 lw x15, -40(x8)
+inst 17: fec42703 lw x14, -20(x8)
+inst 18: 00e7a023 sw x14, 0(x15)
+inst 19: 00000013 addi x0, x0, 0
+inst 20: 02c12403 lw x8, 44(x2)
+inst 21: 03010113 addi x2, x2, 48
+inst 22: 00008067 jalr x0, 0(x1)
+inst 23: fe010113 addi x2, x2, -32
+inst 24: 00112e23 sw x1, 28(x2)
+inst 25: 00812c23 sw x8, 24(x2)
+inst 26: 02010413 addi x8, x2, 32
+inst 27: fe042623 sw x0, -20(x8)
+inst 28: 0a80006f jal x0, 168
+inst 29: fe042423 sw x0, -24(x8)
+inst 30: 0800006f jal x0, 128
+inst 31: 10000717 auipc x14, 268435456
+inst 32: f8470713 addi x14, x14, -124
+inst 33: fe842783 lw x15, -24(x8)
+inst 34: 00279793 slli x15, x15, 2
+inst 35: 00f707b3 add x15, x14, x15
+inst 36: 0007a703 lw x14, 0(x15)
+inst 37: fe842783 lw x15, -24(x8)
+inst 38: 00178793 addi x15, x15, 1
+inst 39: 10000697 auipc x13, 268435456
+inst 40: f6468693 addi x13, x13, -156
+inst 41: 00279793 slli x15, x15, 2
+inst 42: 00f687b3 add x15, x13, x15
+inst 43: 0007a783 lw x15, 0(x15)
+inst 44: 02e7de63 bge x15, x14, 60
+inst 45: fe842783 lw x15, -24(x8)
+inst 46: 00279713 slli x14, x15, 2
+inst 47: 10000797 auipc x15, 268435456
+inst 48: f4478793 addi x15, x15, -188
+inst 49: 00f706b3 add x13, x14, x15
+inst 50: fe842783 lw x15, -24(x8)
+inst 51: 00178793 addi x15, x15, 1
+inst 52: 00279713 slli x14, x15, 2
+inst 53: 10000797 auipc x15, 268435456
+inst 54: f2c78793 addi x15, x15, -212
+inst 55: 00f707b3 add x15, x14, x15
+inst 56: 00078593 addi x11, x15, 0
+inst 57: 00068513 addi x10, x13, 0
+inst 58: f29ff0ef jal x1, -216
+inst 59: fe842783 lw x15, -24(x8)
+inst 60: 00178793 addi x15, x15, 1
+inst 61: fef42423 sw x15, -24(x8)
+inst 62: 00900713 addi x14, x0, 9
+inst 63: fec42783 lw x15, -20(x8)
+inst 64: 40f707b3 sub x15, x14, x15
+inst 65: fe842703 lw x14, -24(x8)
+inst 66: f6f74ae3 blt x14, x15, -140
+inst 67: fec42783 lw x15, -20(x8)
+inst 68: 00178793 addi x15, x15, 1
+inst 69: fef42623 sw x15, -20(x8)
+inst 70: fec42703 lw x14, -20(x8)
+inst 71: 00800793 addi x15, x0, 8
+inst 72: f4e7dae3 bge x15, x14, -172
+inst 73: 100007b7 lui x15, 268435456
+inst 74: fef42223 sw x15, -28(x8)
+inst 75: fe442783 lw x15, -28(x8)
+inst 76: 0007a283 lw x5, 0(x15)
+inst 77: fe442783 lw x15, -28(x8)
+inst 78: 0047a303 lw x6, 4(x15)
+inst 79: fe442783 lw x15, -28(x8)
+inst 80: 0087a383 lw x7, 8(x15)
+inst 81: fe442783 lw x15, -28(x8)
+inst 82: 00c7ae03 lw x28, 12(x15)
+inst 83: fe442783 lw x15, -28(x8)
+inst 84: 0107ae83 lw x29, 16(x15)
+inst 85: fe442783 lw x15, -28(x8)
+inst 86: 0147af03 lw x30, 20(x15)
+inst 87: fe442783 lw x15, -28(x8)
+inst 88: 0247af83 lw x31, 36(x15)
+inst 89: 00000793 addi x15, x0, 0
+inst 90: 00078513 addi x10, x15, 0
+inst 91: 01c12083 lw x1, 28(x2)
+inst 92: 01812403 lw x8, 24(x2)
+inst 93: 02010113 addi x2, x2, 32
+inst 94: 00008067 jalr x0, 0(x1)
+inst 95: 00000013 addi x0, x0, 0

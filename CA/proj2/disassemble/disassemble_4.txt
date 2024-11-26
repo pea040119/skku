@@ -1,0 +1,7 @@
+inst 0: 00a06413 ori x8, x0, 10
+inst 1: 01406493 ori x9, x0, 20
+inst 2: 00006513 ori x10, x0, 0
+inst 3: 00850533 add x10, x10, x8
+inst 4: 00140413 addi x8, x8, 1
+inst 5: 009425b3 slt x11, x8, x9
+inst 6: fe059ae3 bne x11, x0, -12

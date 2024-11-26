@@ -72,13 +72,13 @@ int main(int argc, char* argv[]) {
     inputfile.close();
     cout << "[+] END INITIALIZING" << endl;
 
-    cout << "[*] START BUBBLE SORTING..." << endl;
-    start = clock();
-    bubble_sort(N, bubble_sort_arr);
-    end = clock();
-    elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    cout << "[+] END BUBBLE SORTING..." << endl;
-    cout << "[+] BUBBLE SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
+    // cout << "[*] START BUBBLE SORTING..." << endl;
+    // start = clock();
+    // bubble_sort(N, bubble_sort_arr);
+    // end = clock();
+    // elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    // cout << "[+] END BUBBLE SORTING..." << endl;
+    // cout << "[+] BUBBLE SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
 
     cout << "[*] START "<< type <<" SORTING..." << endl;
     start = clock();
@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
     cout << "[*] START CHECK SORTED ARRAY..." << endl;
     int check = gpu_check_sorted_arr(block_size, N, bubble_sort_arr, sort_arr);
-    cout << "[+] START CHECK SORTED ARRAY" << endl;
+    cout << "[+] END CHECK SORTED ARRAY" << endl;
     cout << "[+] CHECK SORTED ARRAY: " << (check == 0 ? "TRUE" : "FALSE") << endl;
     cout << "[+] DIFFERENCE POSITION NUM: " << check << endl;
 

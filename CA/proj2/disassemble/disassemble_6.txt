@@ -1,0 +1,10 @@
+inst 0: 12400093 addi x1, x0, 292
+inst 1: 4000e113 ori x2, x1, 1024
+inst 2: 00111193 slli x3, x2, 1
+inst 3: 00030237 lui x4, 196608
+inst 4: 00225293 srli x5, x4, 2
+inst 5: e4828293 addi x5, x5, -440
+inst 6: 008000ef jal x1, 8
+inst 7: 00518463 beq x3, x5, 8
+inst 8: 000080e7 jalr x1, 0(x1)
+inst 9: 00100513 addi x10, x0, 1
