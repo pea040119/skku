@@ -62,48 +62,44 @@ int main(int argc, char* argv[]) {
     }
     inputfile.close();
 
-
-    auto bubble_sort_arr = new char[N][30];
-    inputfile.open(argv[1]);
-    for(i=0; i<N; i++) {
-        inputfile >> bubble_sort_arr[i];
+    if (type.compare("bubble") == 0) {
+        cout << "[*] START "<< type <<" SORTING..." << endl;
+        start = clock();
+        bubble_sort(N, sort_arr);
+        end = clock();
+        elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+        cout << "[+] END "<< type <<" SORTING" << endl;
+        cout << "[+] "<< type <<" SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
     }
-    inputfile.close();
-    cout << "[+] END INITIALIZING" << endl;
+    else if (type.compare("radix") == 0) {
+        cout << "[*] START "<< type <<" SORTING..." << endl;
+        start = clock();
+        bubble_sort(N, sort_arr);
+        end = clock();
+        elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+        cout << "[+] END "<< type <<" SORTING" << endl;
+        cout << "[+] "<< type <<" SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
 
-    // cout << "[*] START BUBBLE SORTING..." << endl;
-    // start = clock();
-    // bubble_sort(N, bubble_sort_arr);
-    // end = clock();
-    // elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    // cout << "[+] END BUBBLE SORTING" << endl;
-    // cout << "[+] BUBBLE SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
-
-    cout << "[*] START "<< type <<" SORTING..." << endl;
-    start = clock();
-    gpu_radix_sort(block_size, N, sort_arr);
-    end = clock();
-    elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    cout << "[+] END "<< type <<" SORTING" << endl;
-    cout << "[+] "<< type <<" SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
-
-    // cout << "[*] START CHECK SORTED ARRAY..." << endl;
-    // int check = gpu_check_sorted_arr(block_size, N, bubble_sort_arr, sort_arr);
-    // cout << "[+] END CHECK SORTED ARRAY" << endl;
-    // cout << "[+] CHECK SORTED ARRAY: " << (check == 0 ? "TRUE" : "FALSE") << endl;
-    // cout << "[+] DIFFERENCE POSITION NUM: " << check << endl;
-
-    // cout<<"\n[+] SORT BY BUBBLE" << endl;
-    // for(i=pos; i<N && i<(pos+range); i++)
-    //     cout<< i << ": " << bubble_sort_arr[i]<<endl;
-    // cout<<endl;
+    }
+    else if (type.compare("gpu_radix") == 0) {
+        cout << "[*] START "<< type <<" SORTING..." << endl;
+        start = clock();
+        gpu_radix_sort(block_size, N, sort_arr);
+        end = clock();
+        elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+        cout << "[+] END "<< type <<" SORTING" << endl;
+        cout << "[+] "<< type <<" SORTING TIME ELAPSED: " << elapsed << "sec" << endl;
+    }
+    else {
+        cout << "Invalid type" << endl;
+        return 0;
+    }
 
     cout<<"\n[+] SORT BY "<< type << endl;
     for(i=pos; i<N && i<(pos+range); i++)
         cout<< i << ": " << sort_arr[i]<<endl;
     cout<<endl;
     
-    delete[] bubble_sort_arr;
     delete[] sort_arr;
 
     return 0;

@@ -39,18 +39,16 @@ __device__ int __strncmp_kernel(const char *str_1, const char *str_2, size_t n) 
 
 __device__ int __strlen_kernel(const char *str) {
     int len = 0;
-    while (str[len] != '\0') {
+    while (str[len] != '\0')
         len++;
-    }
     return len;
 }
 
 __device__ void __strncpy_kernel(char *dest, const char *src, size_t n) {
     for (int i=0; i<n; i++) {
         dest[i] = src[i];
-        if (src[i] == '\0') {
+        if (src[i] == '\0')
             break;
-        }
     }
 }
 
@@ -67,9 +65,8 @@ __device__ char __index_to_char_kernel(int n){
 __global__ void __check_sorted_arr_kernel(int *N, char str_arr_1[][MAX_STR_LEN], char str_arr_2[][MAX_STR_LEN], int *result) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < *N) {
-        if (__strncmp_kernel(str_arr_1[tid], str_arr_2[tid], MAX_STR_LEN) != 0) {
+        if (__strncmp_kernel(str_arr_1[tid], str_arr_2[tid], MAX_STR_LEN) != 0)
             atomicAdd(result, 1);
-        }
     }
     __syncthreads();
 }
@@ -130,6 +127,39 @@ void bubble_sort(int N, char str_arr[][MAX_STR_LEN]) {
 }
 
 
+void radix_sort(int N, char str_arr[][MAX_STR_LEN]) {
+    int count[MAX_CHAR-MIN_CHAR+1], prefix_sum[MAX_CHAR-MIN_CHAR+1], offset[N];
+    char output_arr[N][MAX_STR_LEN];
+    
+    memset(count, 0, (MAX_CHAR-MIN_CHAR+1) * sizeof(int));
+    memset(prefix_sum, 0, (MAX_CHAR-MIN_CHAR+1) * sizeof(int));
+    memset(offset, 0, N * sizeof(int));
+
+    for (int i=MAX_STR_LEN-1; i>-1; i--) {
+        // printf("i: %d\n", i);
+        for (int j=0; j<N; j++) {
+            int len = strlen(str_arr[j]);
+            int index = (i < len) ? str_arr[j][i] - MIN_CHAR+1 : 0;
+            offset[j] = count[index];
+            count[index]++;
+        }
+
+        for (int j=1; j<MAX_CHAR-MIN_CHAR+1; j++)
+            prefix_sum[j] = prefix_sum[j-1] + count[j-1];
+
+        for (int j=0; j<N; j++) {
+            int len = strlen(str_arr[j]);
+            int c_index = (i < len) ? str_arr[j][i] - MIN_CHAR+1 : 0;
+            int o_index = prefix_sum[c_index] + offset[j];
+            strncpy(output_arr[o_index], str_arr[j], MAX_STR_LEN);
+        }
+
+        for (int j=0; j<N; j++)
+            strncpy(str_arr[j], output_arr[j], MAX_STR_LEN);
+    }
+}
+
+
 __global__ void __gpu_radix_sort_init_arr_kernel(int *count, int *offset, int *preix_sum, int N) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < N)
@@ -152,9 +182,8 @@ __global__ void __gpu_radix_sort_count_kernel(char str_arr[][MAX_STR_LEN], int *
 }
 
 __global__ void __gpu_radix_sort_prefix_sum_kernel(int *count, int *prefix_sum) {
-    for (int i=1; i<MAX_CHAR-MIN_CHAR+1; i++) {
+    for (int i=1; i<MAX_CHAR-MIN_CHAR+1; i++)
         prefix_sum[i] = prefix_sum[i-1] + count[i-1];
-    }
     __syncthreads();
 }
 
@@ -165,10 +194,8 @@ __global__ void __gpu_radix_sort_reorder_kernel(char str_arr[][MAX_STR_LEN], cha
         int c_index = (pos < len) ? __char_to_index_kernel(str_arr[tid][pos]) : 0;
         int o_index = prefix_sum[c_index] + offset[tid];
         
-        if (o_index < N){
-            // printf("o_index: %d\n", o_index);
+        if (o_index < N)
             __strncpy_kernel(output_arr[o_index], str_arr[tid], MAX_STR_LEN);
-        }
         else
             printf("ERROR: %d\ncount[c_index]: %d\toffset[tid]: %d\n", o_index, prefix_sum[c_index], offset[tid]);
     }
@@ -177,30 +204,26 @@ __global__ void __gpu_radix_sort_reorder_kernel(char str_arr[][MAX_STR_LEN], cha
 
 __global__ void __gpu_radix_sort_copy_arr_kernel(char str_arr[][MAX_STR_LEN], char output_arr[][MAX_STR_LEN], int N) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < N) {
+    if (tid < N)
         __strncpy_kernel(str_arr[tid], output_arr[tid], MAX_STR_LEN);
-    }
     __syncthreads();
 }
 
 __global__ void __gpu_radix_sort_print_str_arr(char str_arr[][MAX_STR_LEN], int N) {
-    for (int i=0; i<N; i++) {
+    for (int i=0; i<N; i++)
         printf("%d: %s\n", i, str_arr[i]);
-    }
     __syncthreads();
 }
 
 __global__ void __gpu_radix_sort_print_int_arr(int *int_arr, int N) {
-    for (int i=0; i<N; i++) {
+    for (int i=0; i<N; i++)
         printf("%d: %i\n", i, int_arr[i]);
-    }
     __syncthreads();
 }
 
 __global__ void __gpu_radix_sprt_print_str_p_arr(char char_arr[][30], int N) {
-    for (int i=0; i<N; i++) {
+    for (int i=0; i<N; i++)
         printf("%d: %p\n", i, char_arr[i]);
-    }
     __syncthreads();
 }
 
