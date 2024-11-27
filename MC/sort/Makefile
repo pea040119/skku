@@ -3,10 +3,12 @@ all:
 	g++ -g -o textgen text_gen.cpp
 
 sort:
-	nvcc -o debug/sort_$(type) src/main.cpp src/sort.cu
-	debug/sort_$(type) input.txt 100000 0 10 256 $(type) > output/sort_$(type).txt
+	nvcc -o debug/sort src/main.cpp src/sort.cu
+	debug/sort input.txt 1000000 0 1000000 256 radix > output/sort.txt
 
 test:
-	nvcc -o debug/test src/main.cpp src/_sort.cu
-	debug/test input.txt 100000 0 10 256 test > output/test.txt
+	nvcc -O3 -o debug/test src/main.cpp src/sort.cu
+	debug/test input.txt 1000000 0 0 256 test > output/test.txt
 
+gen:
+	debug/textgen input_1M.txt 1000000
