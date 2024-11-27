@@ -128,15 +128,21 @@ void bubble_sort(int N, char str_arr[][MAX_STR_LEN]) {
 
 
 void radix_sort(int N, char str_arr[][MAX_STR_LEN]) {
+    cout << "test" << endl;
     int count[MAX_CHAR-MIN_CHAR+1], prefix_sum[MAX_CHAR-MIN_CHAR+1], offset[N];
     char output_arr[N][MAX_STR_LEN];
+    cout << "test" << endl;
     
     memset(count, 0, (MAX_CHAR-MIN_CHAR+1) * sizeof(int));
     memset(prefix_sum, 0, (MAX_CHAR-MIN_CHAR+1) * sizeof(int));
     memset(offset, 0, N * sizeof(int));
 
+    cout << "test" << endl;
     for (int i=MAX_STR_LEN-1; i>-1; i--) {
         // printf("i: %d\n", i);
+        memset(count, 0, (MAX_CHAR-MIN_CHAR+1) * sizeof(int));
+        memset(prefix_sum, 0, (MAX_CHAR-MIN_CHAR+1) * sizeof(int));
+        memset(offset, 0, N * sizeof(int));
         for (int j=0; j<N; j++) {
             int len = strlen(str_arr[j]);
             int index = (i < len) ? str_arr[j][i] - MIN_CHAR+1 : 0;
@@ -157,6 +163,37 @@ void radix_sort(int N, char str_arr[][MAX_STR_LEN]) {
         for (int j=0; j<N; j++)
             strncpy(str_arr[j], output_arr[j], MAX_STR_LEN);
     }
+}
+
+
+int radixSort(char (*arr)[30], int N, char (*res)[30]) {
+  for (int i = 29; i >= 0; i--) {
+    int hist[128] = {0};
+
+    for (int j = 0; j < N; j++) {
+      char c = (i < strlen(arr[j])) ? arr[j][i] : 0;
+      hist[c]++;
+    }
+
+    int prev = 0;
+    for (int j = 0; j < 128; j++) {
+      int temp = hist[j];
+      hist[j] = prev;
+      prev += temp;
+    }
+
+    for (int j = 0; j < N; j++) {
+      char c = (i < strlen(arr[j])) ? arr[j][i] : 0;
+      strncpy(res[hist[c]], arr[j], 30);
+      hist[c]++;
+    }
+
+    for (int j = 0; j < N; j++) {
+      strncpy(arr[j], res[j], 30);
+    }
+  }
+  
+  return 0;
 }
 
 

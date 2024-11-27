@@ -74,7 +74,8 @@ int main(int argc, char* argv[]) {
     else if (type.compare("radix") == 0) {
         cout << "[*] START "<< type <<" SORTING..." << endl;
         start = clock();
-        bubble_sort(N, sort_arr);
+        cout << "test" << endl;
+        radix_sort(N, sort_arr);
         end = clock();
         elapsed = static_cast<double>(end - start) / CLOCKS_PER_SEC;
         cout << "[+] END "<< type <<" SORTING" << endl;

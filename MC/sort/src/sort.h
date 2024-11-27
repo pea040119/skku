@@ -8,5 +8,6 @@ int gpu_check_sorted_arr(int block_size, int N, char str_arr_1[][MAX_STR_LEN], c
 
 void bubble_sort(int N, char str_arr[][MAX_STR_LEN]);
 void radix_sort(int N, char str_arr[][MAX_STR_LEN]);
+int radixSort(char (*arr)[30], int N, char (*res)[30]);
 
 void gpu_radix_sort(int block_size, int N, char str_arr[][MAX_STR_LEN]);
