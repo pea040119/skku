@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     clock_t start, end;
     int block_size = 256;
 
-    if(argc<7){
+    if(argc<5){
 	    cout << "Usage: " << argv[0] << " filename number_of_strings pos range block_size type" << endl;
 	    return 0;
     }
@@ -48,13 +48,15 @@ int main(int argc, char* argv[]) {
 	    return 0;
     }
 
-    ret=sscanf(argv[5],"%d", &block_size);
-    if(ret==EOF || block_size<0){
-	    cout << "Invalid range" << endl;
-	    return 0;
-    }
+    // ret=sscanf(argv[5],"%d", &block_size);
+    // if(ret==EOF || block_size<0){
+	//     cout << "Invalid range" << endl;
+	//     return 0;
+    // }
+    block_size = 256;
 
-    type = argv[6];
+    // type = argv[6];
+    type = "gpu_radix";
 
     auto sort_arr = new char[N][30];
     for(i=0; i<N; i++) {
